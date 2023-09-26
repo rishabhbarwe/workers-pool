@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Work Daily',
+      title: 'mark-5',
       theme: ThemeData(
         primaryColor: Colors.deepPurple, // Apply the primary color
       ),

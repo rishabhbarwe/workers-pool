@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:mark_5/profile_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:mark_5/postjob_page.dart';
+import 'account_page.dart';
+import 'job_details_page.dart';
 import 'message_page.dart';
 import 'style.dart'; // Import the style.dart file
 
@@ -13,39 +16,38 @@ class HomePage extends StatelessWidget {
           style: AppStyles.appBarTitle, // Use the defined style
         ),
         backgroundColor: AppStyles.appBarColor, // Use the defined color
-        actions: [
-          IconButton(
-            icon: Icon(Icons.search),
-            onPressed: () {
-              // Implement search functionality here
-            },
-          ),
-        ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.5),
-                  spreadRadius: 1,
-                  blurRadius: 2,
-                  offset: Offset(0, 2),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 1,
+                        blurRadius: 2,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  margin: EdgeInsets.all(16),
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText:
+                          'Search Jobs', // Add the search icon (\u{1F50D})
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                    ),
+                  ),
                 ),
-              ],
-            ),
-            margin: EdgeInsets.all(16),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Search Jobs',
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(horizontal: 16),
               ),
-            ),
+            ],
           ),
           Padding(
             padding: EdgeInsets.all(16),
@@ -63,42 +65,70 @@ class HomePage extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              itemCount: jobList.length,
-              itemBuilder: (context, index) {
-                // Replace jobList with your actual list of job data
-                final job = jobList[index];
-                return Card(
-                  // Wrap the ListTile in a Card widget
-                  elevation: 2, // Adjust the elevation as needed
-                  margin: EdgeInsets.symmetric(
-                      vertical: 8, horizontal: 16), // Margin between each Card
-                  shape: RoundedRectangleBorder(
-                    // Round the corners of the Card
-                    borderRadius: BorderRadius.circular(10),
-                    side: BorderSide(
-                      // Add a border around the Card
-                      color: Colors.grey, // Customize the border color
-                      width: 1, // Customize the border width
-                    ),
-                  ),
-                  child: ListTile(
-                    title: Text(job.title),
-                    subtitle: Text(job.company),
-                    trailing: Icon(Icons.arrow_forward),
-                    onTap: () {
-                      // Implement job detail page navigation
-                    },
-                    contentPadding: EdgeInsets.all(
-                        16), // Adjust the ListTile content padding
-                    tileColor: Colors.white, // Background color of the ListTile
-                    minVerticalPadding: 0, // Remove default vertical padding
-                    dense: true, // Reduce the height of the ListTile
-                    shape: RoundedRectangleBorder(
-                      // Round the corners of the ListTile
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('jobPostings')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator(); // Display a loading indicator while fetching data
+                }
+                if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                }
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return Text(
+                      'No job postings available.'); // Display a message if no data is available
+                }
+                // Display job postings using a ListView.builder or any other widget
+                return ListView.builder(
+                  itemCount: snapshot.data!.docs.length,
+                  itemBuilder: (context, index) {
+                    final jobData = snapshot.data!.docs[index].data()
+                        as Map<String, dynamic>;
+                    final job = JobPosting.fromJson(jobData);
+
+                    return Card(
+                      elevation: 2,
+                      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        side: BorderSide(
+                          color: Colors.grey,
+                          width: 1,
+                        ),
+                      ),
+                      child: ListTile(
+                        title: Text(job.jobTitle),
+                        subtitle: Text(job.companyName),
+                        trailing: Icon(Icons.arrow_forward),
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => JobDetailsPage(
+                                jobTitle: job.jobTitle,
+                                companyName: job.companyName,
+                                location: job.location,
+                                jobDescription: job.jobDescription,
+                                experience: job.experience,
+                                qualification: job.qualification,
+                                language: job.language,
+                                jobTiming: job.jobTiming,
+                                jobAddress: job.jobAddress,
+                              ),
+                            ),
+                          );
+                        },
+                        contentPadding: EdgeInsets.all(16),
+                        tileColor: Colors.white,
+                        minVerticalPadding: 0,
+                        dense: true,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    );
+                  },
                 );
               },
             ),
@@ -114,6 +144,11 @@ class HomePage extends StatelessWidget {
           BottomNavigationBarItem(
             icon: Icon(Icons.message),
             label: 'Messages',
+            //  backgroundColor: Colors.red,
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.post_add),
+            label: 'Post Job',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
@@ -131,9 +166,15 @@ class HomePage extends StatelessWidget {
             );
           }
           if (index == 2) {
+            // Navigate to the PostJobPage when the post job icon is tapped
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => PostJobPage()),
+            );
+          }
+          if (index == 3) {
             // Navigate to the ProfilePage when the profile icon is tapped
             Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => ProfilePage()),
+              MaterialPageRoute(builder: (context) => AccountPage()),
             );
           }
         },
@@ -160,20 +201,48 @@ class FilterTag extends StatelessWidget {
   }
 }
 
-class Job {
-  final String title;
-  final String company;
+class JobPosting {
+  final String jobTitle;
+  final String companyName;
+  final String location; // Add location field
+  final String jobDescription;
+  final String experience; // Add experience field
+  final String qualification; // Add qualification field
+  final String language; // Add language field
+  final String jobTiming; // Add jobTiming field
+  final String jobAddress; // Add jobAddress field
 
-  Job(this.title, this.company);
+  JobPosting({
+    required this.jobTitle,
+    required this.companyName,
+    required this.location,
+    required this.jobDescription,
+    required this.experience,
+    required this.qualification,
+    required this.language,
+    required this.jobTiming,
+    required this.jobAddress,
+  });
+
+  factory JobPosting.fromJson(Map<String, dynamic> json) {
+    final jobTitle = json['jobTitle'];
+    final companyName = json['companyName'];
+    final jobDescription = json['jobDescription'];
+
+    if (jobTitle == null || companyName == null || jobDescription == null) {
+      throw ArgumentError("Required fields missing in JSON data");
+    }
+
+    return JobPosting(
+      jobTitle: jobTitle,
+      companyName: companyName,
+      location: json['location'] ?? '',
+      jobDescription: jobDescription,
+      experience: json['experience'] ?? '',
+      qualification: json['qualification'] ?? '',
+      language: json['language'] ?? '',
+      jobTiming: json['jobTiming'] ?? '',
+      jobAddress: json['jobAddress'] ?? '',
+    );
+  }
 }
-
-// Sample job data, replace with your actual data
-final List<Job> jobList = [
-  Job('Software Developer', 'ABC Inc.'),
-  Job('UI/UX Designer', 'XYZ Corp.'),
-  Job('Data Analyst', 'Tech Solutions'),
-  Job('Data Analyst', 'Tech Solutions'),
-  Job('Data Analyst', 'Tech Solutions'),
-  Job('Data Analyst', 'Tech Solutions'),
-  Job('Data Analyst', 'Tech Solutions'),
-];
