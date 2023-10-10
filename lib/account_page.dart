@@ -1,19 +1,28 @@
 import 'package:flutter/material.dart';
 
-import 'style.dart'; // Import the style.dart file
+import 'style.dart'; // Import your style.dart file
+import 'user_details_page.dart'; // Import your UserDetailsPage
 
 class AccountPage extends StatefulWidget {
+  AccountPage({Key? key}) : super(key: key);
+
   @override
   _AccountPageState createState() => _AccountPageState();
 }
 
 class _AccountPageState extends State<AccountPage> {
-  // Add fields for user detail
-  String userName = 'Karan Rai';
-  String userEmail = 'karanhyrt244@gmail.com';
+  String userName = 'John Doe';
+  String userEmail = 'johndoe@example.com';
+  String userPhotoURL = 'assets/user.png';
 
-  // Create a GlobalKey for the form
-  final _formKey = GlobalKey<FormState>();
+  void navigateToUserDetailsPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UserDetailsPage(),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,58 +36,98 @@ class _AccountPageState extends State<AccountPage> {
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // User Details Section
-              ListTile(
-                leading: CircleAvatar(
-                  // Display the user's profile image here
-                  //backgroundImage: AssetImage('assets/profile_image.jpg'),
-                  radius: 30,
-                ),
-                title: Text(
-                  userName,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // User Photo and Email Section
+            ListTile(
+              leading: CircleAvatar(
+                radius: 30,
+                backgroundImage: AssetImage(userPhotoURL),
+              ),
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // GestureDetector(
+                  //   onTap: () {
+                  //     // Navigate to UserDetailsPage when tapping on the name
+                  //     navigateToUserDetailsPage();
+                  //   },
+                  //   child: Text(
+                  //     'Name:',
+                  //     style: AppStyles.textFieldLabel,
+                  //   ),
+                  // ),
+                  GestureDetector(
+                    onTap: () {
+                      // Navigate to UserDetailsPage when tapping on the email
+                      navigateToUserDetailsPage();
+                    },
+                    child: Text(
+                      userName, // Display user's name
+                      style: TextStyle(fontSize: 16),
+                    ),
                   ),
-                ),
-                subtitle: Text(userEmail),
+                  // GestureDetector(
+                  //   onTap: () {
+                  //     // Navigate to UserDetailsPage when tapping on the email
+                  //     navigateToUserDetailsPage();
+                  //   },
+                  //   child: Text(
+                  //     'Email:',
+                  //     style: AppStyles.textFieldLabel,
+                  //   ),
+                  // ),
+                  GestureDetector(
+                    onTap: () {
+                      // Navigate to UserDetailsPage when tapping on the email
+                      navigateToUserDetailsPage();
+                    },
+                    child: Text(
+                      userEmail,
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
+                ],
               ),
-              SizedBox(height: 20),
-              Text(
-                ' Options',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+            ),
+            SizedBox(height: 20),
+            Text(
+              'Options',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
               ),
-              ListTile(
-                leading: Icon(Icons.settings),
-                title: Text('Settings'),
-                onTap: () {
-                  // Navigate to the settings page
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.logout),
-                title: Text('Logout'),
-                onTap: () {
-                  // Handle logout here
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.help),
-                title: Text('Help and Support'),
-                onTap: () {
-                  // Navigate to the help and support page
-                },
-              ),
-            ],
-          ),
+            ),
+            ListTile(
+              leading: Icon(Icons.help),
+              title: Text('Help'),
+              onTap: () {
+                // Handle navigation to the help page
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.info),
+              title: Text('About Us'),
+              onTap: () {
+                // Handle navigation to the about us page
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.question_answer),
+              title: Text('FAQs'),
+              onTap: () {
+                // Handle navigation to the FAQs page
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.logout),
+              title: Text('Log Out'),
+              onTap: () {
+                // Handle logout here
+              },
+            ),
+          ],
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -92,12 +141,12 @@ class _AccountPageState extends State<AccountPage> {
             label: 'Messages',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-          BottomNavigationBarItem(
             icon: Icon(Icons.post_add),
             label: 'Post Job',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
           ),
         ],
         selectedItemColor: AppStyles.appBarColor,
@@ -112,5 +161,7 @@ class _AccountPageState extends State<AccountPage> {
 }
 
 void main() {
-  runApp(MaterialApp(home: AccountPage()));
+  runApp(MaterialApp(
+    home: AccountPage(),
+  ));
 }
