@@ -13,6 +13,7 @@ class UserDetailsPage extends StatefulWidget {
 
 class _UserDetailsPageState extends State<UserDetailsPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
@@ -32,22 +33,24 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
   Future<void> fetchUserDetails() async {
     try {
       // Get the current user's ID from FirebaseAuth
-      String userId = FirebaseAuth.instance.currentUser!.uid;
+      final User? currentUser = _auth.currentUser;
 
-      // Fetch user details from Firestore
-      DocumentSnapshot userDoc =
-          await _firestore.collection('users').doc(userId).get();
+      if (currentUser != null) {
+        // Fetch user details from Firestore
+        DocumentSnapshot userDoc =
+            await _firestore.collection('users').doc(currentUser.uid).get();
 
-      // Populate the text fields with the retrieved data
-      setState(() {
-        nameController.text = userDoc['name'] ?? '';
-        emailController.text = userDoc['email'] ?? '';
-        phoneNumberController.text = userDoc['phoneNumber'] ?? '';
-        selectedGender = userDoc['gender'];
-        ageController.text = userDoc['age'] ?? '';
-        educationController.text = userDoc['education'] ?? '';
-        bioController.text = userDoc['bio'] ?? '';
-      });
+        // Populate the text fields with the retrieved data
+        setState(() {
+          nameController.text = userDoc['name'] ?? '';
+          emailController.text = userDoc['email'] ?? '';
+          phoneNumberController.text = userDoc['phoneNumber'] ?? '';
+          selectedGender = userDoc['gender'];
+          ageController.text = userDoc['age'] ?? '';
+          educationController.text = userDoc['education'] ?? '';
+          bioController.text = userDoc['bio'] ?? '';
+        });
+      }
     } catch (e) {
       // Handle errors and show an error message
       ScaffoldMessenger.of(context).showSnackBar(
@@ -59,23 +62,26 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
   void saveChanges() async {
     try {
       // Get the current user's ID from FirebaseAuth
-      String userId = FirebaseAuth.instance.currentUser!.uid;
+      final User? currentUser = _auth.currentUser;
 
-      // Update the user's details in Firestore
-      await _firestore.collection('users').doc(userId).set({
-        'name': nameController.text,
-        'email': emailController.text,
-        'phoneNumber': phoneNumberController.text,
-        'gender': selectedGender ?? '',
-        'age': ageController.text,
-        'education': educationController.text,
-        'bio': bioController.text,
-      });
-
-      // Show a success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Changes saved successfully')),
-      );
+      if (currentUser != null) {
+        // Update the user's details in Firestore
+        await _firestore.collection('users').doc(currentUser.uid).set({
+          'name': nameController.text,
+          'email': emailController.text,
+          'phoneNumber': phoneNumberController.text,
+          'gender': selectedGender ?? '',
+          'age': ageController.text,
+          'education': educationController.text,
+          'bio': bioController.text,
+        });
+        Navigator.pop(context,
+            {'name': nameController.text, 'email': emailController.text});
+        // Show a success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Changes saved successfully')),
+        );
+      }
     } catch (e) {
       // Handle errors and show an error message
       ScaffoldMessenger.of(context).showSnackBar(
@@ -202,6 +208,7 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
           ),
         ),
       ),
+      // ... Rest of your UserDetailsPage code ...
     );
   }
 }

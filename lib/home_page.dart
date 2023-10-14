@@ -11,6 +11,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text(
           'mark-5',
           style: AppStyles.appBarTitle, // Use the defined style
@@ -49,19 +50,22 @@ class HomePage extends StatelessWidget {
               ),
             ],
           ),
-          Padding(
-            padding: EdgeInsets.all(16),
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                FilterTag(tag: 'Home'),
-                FilterTag(tag: 'Construction'),
-                FilterTag(tag: 'Outdoor'),
-                FilterTag(tag: 'Shop'),
-                FilterTag(tag: 'Childcare'),
-                FilterTag(tag: 'Security'),
-              ],
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal, // Add horizontal scroll
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  FilterTag(tag: 'Home'),
+                  FilterTag(tag: 'Construction'),
+                  FilterTag(tag: 'Outdoor'),
+                  FilterTag(tag: 'Shop'),
+                  FilterTag(tag: 'Childcare'),
+                  FilterTag(tag: 'Security'),
+                ],
+              ),
             ),
           ),
           Expanded(
@@ -136,7 +140,8 @@ class HomePage extends StatelessWidget {
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: [
+        type: BottomNavigationBarType.fixed,
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.work),
             label: 'Jobs',
