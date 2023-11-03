@@ -84,6 +84,35 @@ class JobDetailsPage extends StatelessWidget {
           ],
         ),
       ),
+      // Add "Apply" and "Contact" buttons at the bottom
+      bottomNavigationBar: Container(
+        padding: EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Expanded(
+              child: ElevatedButton(
+                onPressed: () {
+                  // Handle "Apply" button action
+                },
+                style:
+                    AppStyles.primaryButtonStyle, // Apply custom button style
+                child: Text('Apply'),
+              ),
+            ),
+            SizedBox(width: 16),
+            Expanded(
+              child: ElevatedButton(
+                onPressed: () {
+                  // Handle "Contact" button action
+                },
+                style:
+                    AppStyles.primaryButtonStyle, // Apply custom button style
+                child: Text('Contact'),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
