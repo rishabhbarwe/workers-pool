@@ -19,7 +19,7 @@ class _MessagePageState extends State<MessagePage> {
       appBar: AppBar(
         title: Text(
           'Notifications',
-          style: AppStyles.appBarTitle, // Use the defined style
+          style: AppStyles.appBarTitle, // Us defined style
         ),
         backgroundColor: AppStyles.appBarColor, // Use the defined color
       ),

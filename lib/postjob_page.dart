@@ -37,6 +37,7 @@ class PostJobPage extends StatelessWidget {
                 ),
                 cursorColor: Colors.deepPurple,
               ),
+              SizedBox(height: 8),
               TextField(
                 controller: companyNameController,
                 decoration: AppStyles.textFieldDecoration.copyWith(
@@ -44,6 +45,7 @@ class PostJobPage extends StatelessWidget {
                 ),
                 cursorColor: Colors.deepPurple,
               ),
+              SizedBox(height: 8),
               TextField(
                 controller: locationController,
                 decoration: AppStyles.textFieldDecoration.copyWith(
@@ -51,6 +53,7 @@ class PostJobPage extends StatelessWidget {
                 ),
                 cursorColor: Colors.deepPurple,
               ),
+              SizedBox(height: 8),
               TextField(
                 controller: jobDescriptionController,
                 decoration: AppStyles.textFieldDecoration.copyWith(
@@ -59,6 +62,7 @@ class PostJobPage extends StatelessWidget {
                 cursorColor: Colors.deepPurple,
                 maxLines: 3,
               ),
+              SizedBox(height: 8),
               TextField(
                 controller: experienceController,
                 decoration: AppStyles.textFieldDecoration.copyWith(
@@ -66,6 +70,7 @@ class PostJobPage extends StatelessWidget {
                 ),
                 cursorColor: Colors.deepPurple,
               ),
+              SizedBox(height: 8),
               TextField(
                 controller: qualificationController,
                 decoration: AppStyles.textFieldDecoration.copyWith(
@@ -73,6 +78,7 @@ class PostJobPage extends StatelessWidget {
                 ),
                 cursorColor: Colors.deepPurple,
               ),
+              SizedBox(height: 8),
               TextField(
                 controller: languageController,
                 decoration: AppStyles.textFieldDecoration.copyWith(
@@ -80,6 +86,7 @@ class PostJobPage extends StatelessWidget {
                 ),
                 cursorColor: Colors.deepPurple,
               ),
+              SizedBox(height: 8),
               TextField(
                 controller: jobTimingController,
                 decoration: AppStyles.textFieldDecoration.copyWith(
@@ -87,6 +94,7 @@ class PostJobPage extends StatelessWidget {
                 ),
                 cursorColor: Colors.deepPurple,
               ),
+              SizedBox(height: 8),
               TextField(
                 controller: jobAddressController,
                 decoration: AppStyles.textFieldDecoration.copyWith(
@@ -94,6 +102,7 @@ class PostJobPage extends StatelessWidget {
                 ),
                 cursorColor: Colors.deepPurple,
               ),
+              SizedBox(height: 8),
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () async {

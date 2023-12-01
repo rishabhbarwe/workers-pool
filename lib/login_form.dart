@@ -73,6 +73,7 @@ class _LoginFormState extends State<LoginForm> {
             cursorColor: Colors.deepPurple,
             //padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           ),
+          SizedBox(height: 8),
           TextField(
             controller: _passwordController,
             decoration: AppStyles.textFieldDecoration.copyWith(

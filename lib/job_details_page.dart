@@ -44,33 +44,127 @@ class JobDetailsPage extends StatelessWidget {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 8),
-            Text(
-              'Company: $companyName',
-              style: AppStyles.textFieldLabel, // Use the defined label style
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color:
+                      Colors.deepPurple, // You can customize the border color
+                  width: 1.0, // You can adjust the border width
+                ),
+                borderRadius: BorderRadius.circular(
+                    8), // You can adjust the border radius
+              ),
+              padding: EdgeInsets.all(8),
+              child: Text(
+                'Company :   $companyName',
+                style: AppStyles.textFieldLabel, // Use the defined label style
+              ),
             ),
-            Text(
-              'Location: $location',
-              style: AppStyles.textFieldLabel, // Use the defined label style
+            SizedBox(height: 8),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.deepPurple, // Customize the border color
+                  width: 1.0, // Adjust the border width
+                ),
+                borderRadius:
+                    BorderRadius.circular(8), // Adjust the border radius
+              ),
+              padding: EdgeInsets.all(8),
+              child: Text(
+                'Location : $location',
+                style: AppStyles.textFieldLabel, // Use the defined label style
+              ),
             ),
-            Text(
-              'Experience: $experience',
-              style: AppStyles.textFieldLabel, // Use the defined label style
+            SizedBox(height: 8), // Add space between text fields
+
+            // Experience
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.deepPurple, // Customize the border color
+                  width: 1.0, // Adjust the border width
+                ),
+                borderRadius:
+                    BorderRadius.circular(8), // Adjust the border radius
+              ),
+              padding: EdgeInsets.all(8),
+              child: Text(
+                'Experience : $experience',
+                style: AppStyles.textFieldLabel, // Use the defined label style
+              ),
             ),
-            Text(
-              'Qualification: $qualification',
-              style: AppStyles.textFieldLabel, // Use the defined label style
+            SizedBox(height: 8), // Add space between text fields
+
+            // Qualification
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.deepPurple, // Customize the border color
+                  width: 1.0, // Adjust the border width
+                ),
+                borderRadius:
+                    BorderRadius.circular(8), // Adjust the border radius
+              ),
+              padding: EdgeInsets.all(8),
+              child: Text(
+                'Qualification : $qualification',
+                style: AppStyles.textFieldLabel, // Use the defined label style
+              ),
             ),
-            Text(
-              'Language: $language',
-              style: AppStyles.textFieldLabel, // Use the defined label style
+            SizedBox(height: 8), // Add space between text fields
+
+            // Language
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.deepPurple, // Customize the border color
+                  width: 1.0, // Adjust the border width
+                ),
+                borderRadius:
+                    BorderRadius.circular(8), // Adjust the border radius
+              ),
+              padding: EdgeInsets.all(8),
+              child: Text(
+                'Language : $language',
+                style: AppStyles.textFieldLabel, // Use the defined label style
+              ),
             ),
-            Text(
-              'Job Timing: $jobTiming',
-              style: AppStyles.textFieldLabel, // Use the defined label style
+            SizedBox(height: 8), // Add space between text fields
+
+            // Job Timing
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.deepPurple, // Customize the border color
+                  width: 1.0, // Adjust the border width
+                ),
+                borderRadius:
+                    BorderRadius.circular(8), // Adjust the border radius
+              ),
+              padding: EdgeInsets.all(8),
+              child: Text(
+                'Job Timing : $jobTiming',
+                style: AppStyles.textFieldLabel, // Use the defined label style
+              ),
             ),
-            Text(
-              'Job Address: $jobAddress',
-              style: AppStyles.textFieldLabel, // Use the defined label style
+            SizedBox(height: 8), // Add space between text fields
+
+            // Job Address
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.deepPurple, // Customize the border color
+                  width: 1.0, // Adjust the border width
+                ),
+                borderRadius:
+                    BorderRadius.circular(8), // Adjust the border radius
+              ),
+              padding: EdgeInsets.all(8),
+              child: Text(
+                'Job Address : $jobAddress',
+                style: AppStyles.textFieldLabel, // Use the defined label style
+              ),
             ),
             SizedBox(height: 16),
             Text(
@@ -84,7 +178,6 @@ class JobDetailsPage extends StatelessWidget {
           ],
         ),
       ),
-      // Add "Apply" and "Contact" buttons at the bottom
       bottomNavigationBar: Container(
         padding: EdgeInsets.all(16),
         child: Row(
