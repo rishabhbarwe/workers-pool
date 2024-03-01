@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'home_page.dart';
-import 'signup_form.dart'; // Import the signup form file
+import 'package:mark_5/signup_form.dart';
+import 'worker/wk_home_page.dart';
+import 'employer/ep_home_page.dart';
 import 'style.dart'; // Import the style.dart file
 
 class LoginForm extends StatefulWidget {
@@ -12,6 +13,7 @@ class LoginForm extends StatefulWidget {
 class _LoginFormState extends State<LoginForm> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  String? _selectedRole;
 
   Future<void> _login() async {
     try {
@@ -23,10 +25,23 @@ class _LoginFormState extends State<LoginForm> {
 
       // Check if login was successful
       if (userCredential.user != null) {
-        // Navigate to the home page if login is successful
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => HomePage()),
-        );
+        // Redirect based on the selected role
+        if (_selectedRole == 'worker') {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => WorkerHomePage()),
+          );
+        } else if (_selectedRole == 'employer') {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => EmployerHomePage()),
+          );
+        } else {
+          // Show a warning if no role is selected
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Please select a role.'),
+            ),
+          );
+        }
       } else {
         // Show a warning for invalid email or password
         ScaffoldMessenger.of(context).showSnackBar(
@@ -71,7 +86,6 @@ class _LoginFormState extends State<LoginForm> {
               labelText: 'Email',
             ),
             cursorColor: Colors.deepPurple,
-            //padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           ),
           SizedBox(height: 8),
           TextField(
@@ -81,6 +95,28 @@ class _LoginFormState extends State<LoginForm> {
             ),
             cursorColor: Colors.deepPurple,
             obscureText: true,
+          ),
+          SizedBox(height: 8),
+          DropdownButtonFormField<String>(
+            value: _selectedRole,
+            onChanged: (value) {
+              setState(() {
+                _selectedRole = value;
+              });
+            },
+            items: [
+              DropdownMenuItem(
+                value: 'worker',
+                child: Text('Worker'),
+              ),
+              DropdownMenuItem(
+                value: 'employer',
+                child: Text('Employer'),
+              ),
+            ],
+            decoration: AppStyles.textFieldDecoration.copyWith(
+              labelText: 'Role (Worker or Employer)',
+            ),
           ),
           SizedBox(height: 20),
           ElevatedButton(

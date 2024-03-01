@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'home_page.dart';
+import 'worker/wk_home_page.dart';
+import 'employer/ep_home_page.dart';
 import 'style.dart'; // Import the style.dart file
 
-class EmailVerificationPage extends StatelessWidget {
+class EmailVerificationPage extends StatefulWidget {
+  @override
+  _EmailVerificationPageState createState() => _EmailVerificationPageState();
+}
+
+class _EmailVerificationPageState extends State<EmailVerificationPage> {
+  String? userType;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,11 +29,30 @@ class EmailVerificationPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'An email has been sent to verify your email address.',
+                'Select your user type:',
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.black, // Apply specific styles here if needed
                 ),
+              ),
+              SizedBox(height: 20),
+              DropdownButton<String>(
+                value: userType,
+                onChanged: (value) {
+                  setState(() {
+                    userType = value;
+                  });
+                },
+                items: [
+                  DropdownMenuItem(
+                    value: 'worker',
+                    child: Text('Worker'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'employer',
+                    child: Text('Employer'),
+                  ),
+                ],
               ),
               SizedBox(height: 20),
               ElevatedButton(
@@ -39,10 +66,24 @@ class EmailVerificationPage extends StatelessWidget {
                   }
 
                   if (user != null && user.emailVerified) {
-                    // Email is verified, navigate to the home page
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) => HomePage()),
-                    );
+                    // Email is verified, navigate to the home page based on user type
+                    if (userType == 'worker') {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                            builder: (context) => WorkerHomePage()),
+                      );
+                    } else if (userType == 'employer') {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                            builder: (context) => EmployerHomePage()),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Please select a user type.'),
+                        ),
+                      );
+                    }
                   } else {
                     // Email is not verified, show a message
                     ScaffoldMessenger.of(context).showSnackBar(

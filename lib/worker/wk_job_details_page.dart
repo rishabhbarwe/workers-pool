@@ -1,12 +1,14 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'style.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../style.dart';
 
-class JobDetailsPage extends StatelessWidget {
+class WorkerJobDetailsPage extends StatelessWidget {
+  final String createrId;
   final String jobId;
   final String jobTitle;
   final String companyName;
+  final String jobType;
   final String location;
   final String jobDescription;
   final String experience;
@@ -14,8 +16,10 @@ class JobDetailsPage extends StatelessWidget {
   final String language;
   final String jobTiming;
   final String jobAddress;
+  // final String receiverId; // ID of the employer who posted the job
 
-  JobDetailsPage({
+  WorkerJobDetailsPage({
+    required this.createrId,
     required this.jobId,
     required this.jobTitle,
     required this.companyName,
@@ -26,54 +30,81 @@ class JobDetailsPage extends StatelessWidget {
     required this.language,
     required this.jobTiming,
     required this.jobAddress,
+    required this.jobType,
+    //  required this.receiverId,
   });
 
-  void _showContactDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Contact Employer'),
-          content: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Name: [Employer Name]'),
-              Text('Email: [Employer Email]'),
-              Text('Contact: [Employer Contact]'),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: Text('Close'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void applyForJob(BuildContext context) async {
+  void handleApplyButton(BuildContext context) async {
     try {
-      final User? currentUser = FirebaseAuth.instance.currentUser;
-
+      // Get the current user
+      User? currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser != null) {
-        await FirebaseFirestore.instance.collection('jobApplications').add({
-          'applicantId': currentUser.uid,
+        // Create a request document with details
+        await FirebaseFirestore.instance.collection('requests').add({
+          'senderId': currentUser.uid,
+          'receiverId': createrId, // ID of the employer
           'jobId': jobId,
-          'status': 'pending',
+          'status': 'PENDING',
+          // Add other details as needed
         });
 
+        // Show a success message
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Application sent successfully')),
+          const SnackBar(content: Text('Request sent successfully')),
         );
       }
     } catch (e) {
+      // Handle errors
+      print('Error sending request: $e');
+      // Show an error message
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to send application: $e')),
+        SnackBar(content: Text('Failed to send request: $e')),
+      );
+    }
+  }
+
+  Future<void> _showContactDialog(BuildContext context) async {
+    try {
+      DocumentSnapshot snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(createrId)
+          .get();
+      Map<String, dynamic> userData = snapshot.data() as Map<String, dynamic>;
+      String name = userData['name'] ?? '';
+      String phoneNumber = userData['phoneNumber'] ?? '';
+      String email = userData['email'] ?? '';
+
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Contact Information'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Name: $name'),
+                SizedBox(height: 8),
+                Text('Phone Number: $phoneNumber'),
+                SizedBox(height: 8),
+                Text('Email: $email'),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('Close'),
+              ),
+            ],
+          );
+        },
+      );
+    } catch (e) {
+      print('Error fetching contact information: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to fetch contact information')),
       );
     }
   }
@@ -83,7 +114,7 @@ class JobDetailsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Job Details',
+          'Job Details..',
           style: AppStyles.appBarTitle,
         ),
         backgroundColor: AppStyles.appBarColor,
@@ -95,9 +126,9 @@ class JobDetailsPage extends StatelessWidget {
           children: [
             Text(
               jobTitle,
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Container(
               decoration: BoxDecoration(
                 border: Border.all(
@@ -106,13 +137,13 @@ class JobDetailsPage extends StatelessWidget {
                 ),
                 borderRadius: BorderRadius.circular(8),
               ),
-              padding: EdgeInsets.all(8),
+              padding: const EdgeInsets.all(8),
               child: Text(
                 'Company :   $companyName',
                 style: AppStyles.textFieldLabel,
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Container(
               decoration: BoxDecoration(
                 border: Border.all(
@@ -121,13 +152,28 @@ class JobDetailsPage extends StatelessWidget {
                 ),
                 borderRadius: BorderRadius.circular(8),
               ),
-              padding: EdgeInsets.all(8),
+              padding: const EdgeInsets.all(8),
+              child: Text(
+                'Job Type : $jobType',
+                style: AppStyles.textFieldLabel,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.deepPurple,
+                  width: 1.0,
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: const EdgeInsets.all(8),
               child: Text(
                 'Location : $location',
                 style: AppStyles.textFieldLabel,
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Container(
               decoration: BoxDecoration(
                 border: Border.all(
@@ -136,13 +182,13 @@ class JobDetailsPage extends StatelessWidget {
                 ),
                 borderRadius: BorderRadius.circular(8),
               ),
-              padding: EdgeInsets.all(8),
+              padding: const EdgeInsets.all(8),
               child: Text(
                 'Experience : $experience',
                 style: AppStyles.textFieldLabel,
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Container(
               decoration: BoxDecoration(
                 border: Border.all(
@@ -151,13 +197,13 @@ class JobDetailsPage extends StatelessWidget {
                 ),
                 borderRadius: BorderRadius.circular(8),
               ),
-              padding: EdgeInsets.all(8),
+              padding: const EdgeInsets.all(8),
               child: Text(
                 'Qualification : $qualification',
                 style: AppStyles.textFieldLabel,
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Container(
               decoration: BoxDecoration(
                 border: Border.all(
@@ -166,13 +212,13 @@ class JobDetailsPage extends StatelessWidget {
                 ),
                 borderRadius: BorderRadius.circular(8),
               ),
-              padding: EdgeInsets.all(8),
+              padding: const EdgeInsets.all(8),
               child: Text(
                 'Language : $language',
                 style: AppStyles.textFieldLabel,
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Container(
               decoration: BoxDecoration(
                 border: Border.all(
@@ -181,13 +227,13 @@ class JobDetailsPage extends StatelessWidget {
                 ),
                 borderRadius: BorderRadius.circular(8),
               ),
-              padding: EdgeInsets.all(8),
+              padding: const EdgeInsets.all(8),
               child: Text(
                 'Job Timing : $jobTiming',
                 style: AppStyles.textFieldLabel,
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Container(
               decoration: BoxDecoration(
                 border: Border.all(
@@ -196,14 +242,14 @@ class JobDetailsPage extends StatelessWidget {
                 ),
                 borderRadius: BorderRadius.circular(8),
               ),
-              padding: EdgeInsets.all(8),
+              padding: const EdgeInsets.all(8),
               child: Text(
                 'Job Address : $jobAddress',
                 style: AppStyles.textFieldLabel,
               ),
             ),
-            SizedBox(height: 16),
-            Text(
+            const SizedBox(height: 16),
+            const Text(
               'Job Description',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
@@ -215,26 +261,22 @@ class JobDetailsPage extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: Container(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Row(
           children: [
             Expanded(
               child: ElevatedButton(
-                onPressed: () {
-                  applyForJob(context); // Handle "Apply" button action
-                },
+                onPressed: () => handleApplyButton(context),
                 style: AppStyles.primaryButtonStyle,
-                child: Text('Apply'),
+                child: const Text('Apply'),
               ),
             ),
-            SizedBox(width: 16),
+            const SizedBox(width: 16),
             Expanded(
               child: ElevatedButton(
-                onPressed: () {
-                  _showContactDialog(context);
-                },
+                onPressed: () => _showContactDialog(context),
                 style: AppStyles.primaryButtonStyle,
-                child: Text('Contact'),
+                child: const Text('Contact'),
               ),
             ),
           ],

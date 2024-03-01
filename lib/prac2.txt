@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'style.dart'; // Import your style.dart file
-
+import 'style.dart'; 
 class UserDetailsPage extends StatefulWidget {
   UserDetailsPage({Key? key}) : super(key: key);
 
@@ -21,7 +20,7 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
   TextEditingController ageController = TextEditingController();
   TextEditingController educationController = TextEditingController();
   TextEditingController bioController = TextEditingController();
-  String? selectedRole; // New field for Worker/Employer
+  String? selectedRole; 
 
   @override
   void initState() {
@@ -68,7 +67,6 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
       if (currentUser != null) {
         // Update the user's details in Firestore
         await _firestore.collection('users').doc(currentUser.uid).set({
-          'userId': currentUser.uid, // Add userId field to store current UID
           'name': nameController.text,
           'email': emailController.text,
           'phoneNumber': phoneNumberController.text,

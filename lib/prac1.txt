@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'style.dart';
+import '../style.dart';
 
-class JobDetailsPage extends StatelessWidget {
+class WorkerJobDetailsPage extends StatelessWidget {
   final String jobId;
   final String jobTitle;
   final String companyName;
@@ -15,7 +15,7 @@ class JobDetailsPage extends StatelessWidget {
   final String jobTiming;
   final String jobAddress;
 
-  JobDetailsPage({
+  WorkerJobDetailsPage({
     required this.jobId,
     required this.jobTitle,
     required this.companyName,
@@ -28,62 +28,12 @@ class JobDetailsPage extends StatelessWidget {
     required this.jobAddress,
   });
 
-  void _showContactDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Contact Employer'),
-          content: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Name: [Employer Name]'),
-              Text('Email: [Employer Email]'),
-              Text('Contact: [Employer Contact]'),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: Text('Close'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void applyForJob(BuildContext context) async {
-    try {
-      final User? currentUser = FirebaseAuth.instance.currentUser;
-
-      if (currentUser != null) {
-        await FirebaseFirestore.instance.collection('jobApplications').add({
-          'applicantId': currentUser.uid,
-          'jobId': jobId,
-          'status': 'pending',
-        });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Application sent successfully')),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to send application: $e')),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Job Details',
+          'Job Details..',
           style: AppStyles.appBarTitle,
         ),
         backgroundColor: AppStyles.appBarColor,
@@ -220,9 +170,7 @@ class JobDetailsPage extends StatelessWidget {
           children: [
             Expanded(
               child: ElevatedButton(
-                onPressed: () {
-                  applyForJob(context); // Handle "Apply" button action
-                },
+                onPressed: () => handleApplyButton(context),
                 style: AppStyles.primaryButtonStyle,
                 child: Text('Apply'),
               ),
@@ -230,9 +178,7 @@ class JobDetailsPage extends StatelessWidget {
             SizedBox(width: 16),
             Expanded(
               child: ElevatedButton(
-                onPressed: () {
-                  _showContactDialog(context);
-                },
+                onPressed: () {},
                 style: AppStyles.primaryButtonStyle,
                 child: Text('Contact'),
               ),

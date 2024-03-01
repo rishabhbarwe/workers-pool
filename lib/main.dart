@@ -4,7 +4,6 @@ import 'firebase_options.dart';
 import 'login_form.dart';
 import 'signup_form.dart';
 import 'style.dart';
-//import 'authentication_page.dart'; // Change to authentication_page.dart
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,9 +17,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'mark-5',
+      title: 'Work Daily',
       theme: ThemeData(
-        primaryColor: Colors.deepPurple, // Apply the primary color
+        primaryColor: Colors.deepPurple,
       ),
       home: AuthenticationPage(),
     );
@@ -46,7 +45,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          _showLogin ? 'mark-5' : 'mark-5',
+          _showLogin ? 'Work Daily' : 'Work Daily',
           style: AppStyles.appBarTitle,
         ),
         backgroundColor: AppStyles.appBarColor,
@@ -57,7 +56,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
       bottomNavigationBar: BottomAppBar(
         child: TextButton(
           style: TextButton.styleFrom(
-            primary: Colors.deepPurple, // Apply primary color
+            primary: Colors.deepPurple,
           ),
           onPressed: _toggleForm,
           child: Text(_showLogin

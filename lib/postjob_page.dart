@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'style.dart'; // Import the style.dart file
+import 'package:firebase_auth/firebase_auth.dart';
+import 'style.dart';
 
 class PostJobPage extends StatelessWidget {
   final TextEditingController jobTitleController = TextEditingController();
   final TextEditingController companyNameController = TextEditingController();
+  final TextEditingController jobTypeController = TextEditingController();
   final TextEditingController locationController = TextEditingController();
   final TextEditingController jobDescriptionController =
       TextEditingController();
@@ -26,7 +28,7 @@ class PostJobPage extends StatelessWidget {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(30.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -46,6 +48,13 @@ class PostJobPage extends StatelessWidget {
                 cursorColor: Colors.deepPurple,
               ),
               SizedBox(height: 8),
+              TextField(
+                controller: jobTypeController,
+                decoration: AppStyles.textFieldDecoration.copyWith(
+                  labelText: 'Job Type',
+                ),
+                cursorColor: Colors.deepPurple,
+              ),
               TextField(
                 controller: locationController,
                 decoration: AppStyles.textFieldDecoration.copyWith(
@@ -107,32 +116,46 @@ class PostJobPage extends StatelessWidget {
               ElevatedButton(
                 onPressed: () async {
                   try {
-                    final jobPosting = JobPosting(
-                      jobTitle: jobTitleController.text,
-                      companyName: companyNameController.text,
-                      location: locationController.text,
-                      jobDescription: jobDescriptionController.text,
-                      experience: experienceController.text,
-                      qualification: qualificationController.text,
-                      language: languageController.text,
-                      jobTiming: jobTimingController.text,
-                      jobAddress: jobAddressController.text,
-                    );
+                    final currentUser = FirebaseAuth.instance.currentUser;
+                    if (currentUser != null) {
+                      final jobPosting = JobPosting(
+                        createrId: currentUser.uid,
+                        jobTitle: jobTitleController.text,
+                        companyName: companyNameController.text,
+                        jobType: jobTypeController.text,
+                        location: locationController.text,
+                        jobDescription: jobDescriptionController.text,
+                        experience: experienceController.text,
+                        qualification: qualificationController.text,
+                        language: languageController.text,
+                        jobTiming: jobTimingController.text,
+                        jobAddress: jobAddressController.text,
+                      );
 
-                    await FirebaseFirestore.instance
-                        .collection('jobPostings')
-                        .add(jobPosting.toJson());
+                      final DocumentReference jobRef = await FirebaseFirestore
+                          .instance
+                          .collection('jobPostings')
+                          .add(jobPosting.toJson());
 
-                    // Clear all text controllers after posting the job
-                    jobTitleController.clear();
-                    companyNameController.clear();
-                    locationController.clear();
-                    jobDescriptionController.clear();
-                    experienceController.clear();
-                    qualificationController.clear();
-                    languageController.clear();
-                    jobTimingController.clear();
-                    jobAddressController.clear();
+                      final jobId = jobRef.id;
+
+                      // Update the jobId in the jobPosting object
+                      jobPosting.jobId = jobId;
+                      // Update Firestore with the complete jobPosting object
+                      await jobRef.update({'jobId': jobId});
+
+                      // Clear all text controllers after posting the job
+                      jobTitleController.clear();
+                      companyNameController.clear();
+                      jobTypeController.clear();
+                      locationController.clear();
+                      jobDescriptionController.clear();
+                      experienceController.clear();
+                      qualificationController.clear();
+                      languageController.clear();
+                      jobTimingController.clear();
+                      jobAddressController.clear();
+                    }
                   } catch (error) {
                     print('Error posting job: $error');
                   }
@@ -149,8 +172,11 @@ class PostJobPage extends StatelessWidget {
 }
 
 class JobPosting {
+  String jobId = ''; // Remove 'late' keyword and assign a default value
+  final String createrId;
   final String jobTitle;
   final String companyName;
+  final String jobType;
   final String location;
   final String jobDescription;
   final String experience;
@@ -160,8 +186,10 @@ class JobPosting {
   final String jobAddress;
 
   JobPosting({
+    required this.createrId,
     required this.jobTitle,
     required this.companyName,
+    required this.jobType,
     required this.location,
     required this.jobDescription,
     required this.experience,
@@ -173,8 +201,11 @@ class JobPosting {
 
   Map<String, dynamic> toJson() {
     return {
+      'jobId': jobId,
+      'createrId': createrId,
       'jobTitle': jobTitle,
       'companyName': companyName,
+      'jobType': jobType,
       'location': location,
       'jobDescription': jobDescription,
       'experience': experience,
@@ -185,118 +216,3 @@ class JobPosting {
     };
   }
 }
-
-
-// start below 
-
-
-// import 'package:flutter/material.dart';
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'style.dart'; // Import the style.dart file
-
-// class PostJobPage extends StatelessWidget {
-//   final TextEditingController jobTitleController = TextEditingController();
-//   final TextEditingController companyNameController = TextEditingController();
-//   final TextEditingController locationController = TextEditingController();
-//   final TextEditingController jobDescriptionController =
-//       TextEditingController();
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text(
-//           'Post a Job',
-//           style: AppStyles.appBarTitle,
-//         ),
-//         backgroundColor: AppStyles.appBarColor,
-//       ),
-//       body: Padding(
-//         padding: const EdgeInsets.all(16.0),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.stretch,
-//           children: [
-//             TextField(
-//               controller: jobTitleController,
-//               decoration: AppStyles.textFieldDecoration.copyWith(
-//                 labelText: 'Job Title',
-//               ),
-//               cursorColor: Colors.deepPurple,
-//             ),
-//             TextField(
-//               controller: companyNameController,
-//               decoration: AppStyles.textFieldDecoration.copyWith(
-//                 labelText: 'Company Name',
-//               ),
-//               cursorColor: Colors.deepPurple,
-//             ),
-//             TextField(
-//               controller: locationController,
-//               decoration: AppStyles.textFieldDecoration.copyWith(
-//                 labelText: 'Location',
-//               ),
-//               cursorColor: Colors.deepPurple,
-//             ),
-//             TextField(
-//               controller: jobDescriptionController,
-//               decoration: AppStyles.textFieldDecoration.copyWith(
-//                 labelText: 'Job Description',
-//               ),
-//               cursorColor: Colors.deepPurple,
-//               maxLines: 3,
-//             ),
-//             SizedBox(height: 20),
-//             ElevatedButton(
-//               onPressed: () async {
-//                 try {
-//                   final jobPosting = JobPosting(
-//                     jobTitle: jobTitleController.text,
-//                     companyName: companyNameController.text,
-//                     location: locationController.text,
-//                     jobDescription: jobDescriptionController.text,
-//                   );
-
-//                   await FirebaseFirestore.instance
-//                       .collection('jobPostings')
-//                       .add(jobPosting.toJson());
-
-//                   jobTitleController.clear();
-//                   companyNameController.clear();
-//                   locationController.clear();
-//                   jobDescriptionController.clear();
-//                 } catch (error) {
-//                   print('Error posting job: $error');
-//                 }
-//               },
-//               style: AppStyles.primaryButtonStyle,
-//               child: Text('Post Job'),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-// class JobPosting {
-//   final String jobTitle;
-//   final String companyName;
-//   final String location;
-//   final String jobDescription;
-
-//   JobPosting({
-//     required this.jobTitle,
-//     required this.companyName,
-//     required this.location,
-//     required this.jobDescription,
-//   });
-
-//   Map<String, dynamic> toJson() {
-//     return {
-//       'jobTitle': jobTitle,
-//       'companyName': companyName,
-//       'location': location,
-//       'jobDescription': jobDescription,
-//     };
-//   }
-// }

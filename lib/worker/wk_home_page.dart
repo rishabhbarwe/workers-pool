@@ -1,19 +1,56 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:mark_5/postjob_page.dart';
-import 'account_page.dart';
-import 'job_details_page.dart';
-import 'message_page.dart';
-import 'style.dart'; // Import the style.dart file
+import '../style.dart';
+import 'wk_account_page.dart';
+import 'wk_job_details_page.dart';
+import 'wk_job_history.dart';
+import 'wk_message_page.dart';
 
-class HomePage extends StatelessWidget {
+class WorkerHomePage extends StatefulWidget {
+  @override
+  _WorkerHomePageState createState() => _WorkerHomePageState();
+}
+
+class _WorkerHomePageState extends State<WorkerHomePage> {
+  int _selectedIndex = 0; // Initially selected index is 0 (WJobs)
+
+  void _onItemTapped(int index) {
+    if (_selectedIndex != index) {
+      setState(() {
+        _selectedIndex = index;
+      });
+      switch (_selectedIndex) {
+        case 0:
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => WorkerHomePage()),
+          );
+          break;
+        case 1:
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => WorkerMessagePage()),
+          );
+          break;
+        case 2:
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => WorkerJobHistoryPage()),
+          );
+          break;
+        case 3:
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => WorkerAccountPage()),
+          );
+          break;
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text(
-          'W Daily',
+          'Work1 Daily',
           style: AppStyles.appBarTitle,
         ),
         backgroundColor: AppStyles.appBarColor,
@@ -109,10 +146,12 @@ class HomePage extends StatelessWidget {
                         onTap: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (context) => JobDetailsPage(
+                              builder: (context) => WorkerJobDetailsPage(
+                                createrId: job.createrId,
                                 jobId: job.jobId, // Pass jobId here
                                 jobTitle: job.jobTitle,
                                 companyName: job.companyName,
+                                jobType: job.jobType,
                                 location: job.location,
                                 jobDescription: job.jobDescription,
                                 experience: job.experience,
@@ -145,47 +184,41 @@ class HomePage extends StatelessWidget {
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.work),
-            label: 'Jobs',
+            label: 'WJobs',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.message),
-            label: 'Messages',
+            label: 'WMessages',
             //  backgroundColor: Colors.red,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.post_add),
-            label: 'Post Job',
+            label: 'WJob History',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
-            label: 'Profile',
+            label: 'WProfile',
           ),
         ],
-        selectedItemColor: AppStyles.appBarColor,
+        selectedItemColor: _getSelectedColor(_selectedIndex),
         unselectedItemColor: Colors.grey,
         backgroundColor: Colors.white,
-        onTap: (index) {
-          if (index == 1) {
-            // Navigate to the MessagePage when the message icon is tapped
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => MessagePage()),
-            );
-          }
-          if (index == 2) {
-            // Navigate to the PostJobPage when the post job icon is tapped
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => PostJobPage()),
-            );
-          }
-          if (index == 3) {
-            // Navigate to the ProfilePage when the profile icon is tapped
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => AccountPage()),
-            );
-          }
-        },
+        onTap: _onItemTapped,
       ),
     );
+  }
+
+  Color _getSelectedColor(int index) {
+    if (index == 0) {
+      return Colors.deepPurple; // Color for WJobs
+    } else if (index == 1) {
+      return Colors.deepPurple; // Color for WMessages
+    } else if (index == 2) {
+      return Colors.deepPurple; // Color for WJob History
+    } else if (index == 3) {
+      return Colors.deepPurple; // Color for WProfile
+    }
+    return AppStyles.appBarColor; // Default color for WJobs
   }
 }
 
@@ -208,9 +241,11 @@ class FilterTag extends StatelessWidget {
 }
 
 class JobPosting {
+  final String createrId;
   final String jobId; // Add jobId field
   final String jobTitle;
   final String companyName;
+  final String jobType;
   final String location; // Add location field
   final String jobDescription;
   final String experience; // Add experience field
@@ -220,9 +255,11 @@ class JobPosting {
   final String jobAddress; // Add jobAddress field
 
   JobPosting({
+    required this.createrId,
     required this.jobId, // Include jobId in the constructor
     required this.jobTitle,
     required this.companyName,
+    required this.jobType,
     required this.location,
     required this.jobDescription,
     required this.experience,
@@ -233,13 +270,15 @@ class JobPosting {
   });
 
   factory JobPosting.fromJson(Map<String, dynamic> json) {
-    final jobId = json['jobId']; // Retrieve jobId from JSON
-
+    final jobId = json['jobId'];
+// Retrieve jobId from JSON
+    final createrId = json['createrId'];
     final jobTitle = json['jobTitle'];
     final companyName = json['companyName'];
     final jobDescription = json['jobDescription'];
 
-    if (jobId == null ||
+    if (createrId == null ||
+        jobId == null ||
         jobTitle == null ||
         companyName == null ||
         jobDescription == null) {
@@ -247,9 +286,11 @@ class JobPosting {
     }
 
     return JobPosting(
+      createrId: createrId,
       jobId: jobId,
       jobTitle: jobTitle,
       companyName: companyName,
+      jobType: json['jobType'] ?? '',
       location: json['location'] ?? '',
       jobDescription: jobDescription,
       experience: json['experience'] ?? '',

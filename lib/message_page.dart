@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mark_5/postjob_page.dart';
 import 'package:mark_5/style.dart';
 
@@ -19,31 +21,73 @@ class _MessagePageState extends State<MessagePage> {
       appBar: AppBar(
         title: Text(
           'Notifications',
-          style: AppStyles.appBarTitle, // Us defined style
+          style: AppStyles.appBarTitle, // Use defined style
         ),
-        backgroundColor: AppStyles.appBarColor, // Use the defined color
+        backgroundColor: AppStyles.appBarColor, // Use defined color
       ),
-      body: ListView.builder(
-        itemCount: notifications.length,
-        itemBuilder: (context, index) {
-          final notification = notifications[index];
-          return ListTile(
-            title: Text(
-              notification.title,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            subtitle: Text(notification.message),
-            trailing: Icon(Icons.notifications),
-            onTap: () {
-              // Handle notification tap
+      body: StreamBuilder<QuerySnapshot>(
+        stream: getJobApplicationsForUserB(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return CircularProgressIndicator(); // Display a loading indicator while fetching data
+          }
+          if (snapshot.hasError) {
+            return Text('Error: ${snapshot.error}');
+          }
+
+          final jobApplications = snapshot.data?.docs ?? [];
+
+          return ListView.builder(
+            itemCount: jobApplications.length,
+            itemBuilder: (context, index) {
+              final jobApplication = JobApplication.fromJson(
+                jobApplications[index].data() as Map<String, dynamic>,
+              );
+
+              return ListTile(
+                title: Text(
+                  'New Job Application',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text('From: ${jobApplication.applicantName}'),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        // Handle 'Accept' button tap
+                        acceptJobApplication(jobApplication);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.green,
+                      ),
+                      child: Text('Accept'),
+                    ),
+                    SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () {
+                        // Handle 'Reject' button tap
+                        rejectJobApplication(jobApplication);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.red,
+                      ),
+                      child: Text('Reject'),
+                    ),
+                  ],
+                ),
+                onTap: () {
+                  // Handle notification tap
+                },
+                contentPadding: EdgeInsets.all(16),
+                tileColor: Colors.white,
+                minVerticalPadding: 0,
+                dense: true,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              );
             },
-            contentPadding: EdgeInsets.all(16),
-            tileColor: Colors.white,
-            minVerticalPadding: 0,
-            dense: true,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
           );
         },
       ),
@@ -117,19 +161,37 @@ class _MessagePageState extends State<MessagePage> {
       ),
     );
   }
+
+  void acceptJobApplication(JobApplication jobApplication) {
+    // Implement the logic for accepting the job application
+  }
+
+  void rejectJobApplication(JobApplication jobApplication) {
+    // Implement the logic for rejecting the job application
+  }
+
+  Stream<QuerySnapshot> getJobApplicationsForUserB() {
+    final User? currentUser = FirebaseAuth.instance.currentUser;
+
+    if (currentUser != null) {
+      return FirebaseFirestore.instance
+          .collection('jobApplications')
+          .where('status', isEqualTo: 'pending')
+          .where('applicantId', isEqualTo: currentUser.uid)
+          .snapshots();
+    } else {
+      // Return an empty stream if the user is not authenticated
+      return Stream.empty();
+    }
+  }
 }
 
-class Notification {
-  final String title;
-  final String message;
+class JobApplication {
+  final String applicantName;
 
-  Notification(this.title, this.message);
+  JobApplication({required this.applicantName});
+
+  factory JobApplication.fromJson(Map<String, dynamic> json) {
+    return JobApplication(applicantName: json['applicantName'] ?? '');
+  }
 }
-
-// Sample notification data, replace with your actual data
-final List<Notification> notifications = [
-  Notification('New Job Alert', 'A new job opportunity is available.'),
-  Notification(
-      'Application Update', 'Please update your app to the latest version.'),
-  Notification('Welcome', 'Welcome to our app!'),
-];

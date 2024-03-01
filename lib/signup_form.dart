@@ -11,6 +11,8 @@ class SignupForm extends StatefulWidget {
 class _SignupFormState extends State<SignupForm> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _phoneNumberController = TextEditingController();
+  String? _selectedRole;
 
   Future<void> _signup() async {
     try {
@@ -28,8 +30,8 @@ class _SignupFormState extends State<SignupForm> {
       // Navigate to the email verification page
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-            builder: (context) =>
-                EmailVerificationPage()), // Navigate to email verification page
+          builder: (context) => EmailVerificationPage(),
+        ),
       );
     } catch (e) {
       // Handle signup errors here.
@@ -41,46 +43,81 @@ class _SignupFormState extends State<SignupForm> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(40.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: ListView(
         children: [
-          Text(
-            'Register/Sign Up',
-            style: TextStyle(
-              fontSize: 24, // Adjust the font size as needed
-              fontWeight: FontWeight.bold, // Use bold font
-              color: Colors.deepPurple, // Text color
-            ),
-            textAlign: TextAlign.center, // Center the text
-          ),
-          SizedBox(height: 20),
-          TextField(
-            controller: _emailController,
-            decoration: AppStyles.textFieldDecoration.copyWith(
-              labelText: 'Email',
-            ),
-            cursorColor: Colors.deepPurple,
-          ),
-          TextField(
-            controller: _passwordController,
-            decoration: AppStyles.textFieldDecoration.copyWith(
-              labelText: 'Password',
-            ),
-            obscureText: true,
-            cursorColor: Colors.deepPurple,
-          ),
-          SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: _signup,
-            style: AppStyles.primaryButtonStyle, // Apply button style
-            child: Text('Sign Up'),
-          ),
-          TextButton(
-            onPressed: () {
-              // Implement navigation to the login page here.
-            },
-            child: Text('.'),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Register/Sign Up',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepPurple,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 20),
+              TextField(
+                controller: _emailController,
+                decoration: AppStyles.textFieldDecoration.copyWith(
+                  labelText: 'Email',
+                ),
+                cursorColor: Colors.deepPurple,
+              ),
+              SizedBox(height: 8),
+              TextField(
+                controller: _passwordController,
+                decoration: AppStyles.textFieldDecoration.copyWith(
+                  labelText: 'Password',
+                ),
+                obscureText: true,
+                cursorColor: Colors.deepPurple,
+              ),
+              SizedBox(height: 8),
+              TextField(
+                controller: _phoneNumberController,
+                decoration: AppStyles.textFieldDecoration.copyWith(
+                  labelText: 'Phone Number',
+                ),
+                cursorColor: Colors.deepPurple,
+              ),
+              SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                value: _selectedRole,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedRole = value;
+                  });
+                },
+                items: [
+                  DropdownMenuItem(
+                    value: 'worker',
+                    child: Text('Worker'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'employer',
+                    child: Text('Employer'),
+                  ),
+                ],
+                decoration: AppStyles.textFieldDecoration.copyWith(
+                  labelText: 'Role (Worker or Employer)',
+                ),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _signup,
+                style: AppStyles.primaryButtonStyle,
+                child: Text('Sign Up'),
+              ),
+              TextButton(
+                onPressed: () {
+                  // Implement navigation to the login page here.
+                },
+                child: Text('.'),
+              ),
+            ],
           ),
         ],
       ),
