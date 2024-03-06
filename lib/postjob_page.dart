@@ -55,6 +55,7 @@ class PostJobPage extends StatelessWidget {
                 ),
                 cursorColor: Colors.deepPurple,
               ),
+              SizedBox(height: 8),
               TextField(
                 controller: locationController,
                 decoration: AppStyles.textFieldDecoration.copyWith(

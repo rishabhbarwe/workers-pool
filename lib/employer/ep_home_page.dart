@@ -4,11 +4,14 @@ import '../style.dart';
 import 'ep_account_page.dart';
 import 'ep_message_page.dart';
 import '../postjob_page.dart';
-import 'ep_job_details_page.dart'; // Import the ep_job_details_page.dart
+import 'ep_job_details_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class EmployerHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final currentUserUid = FirebaseAuth.instance.currentUser?.uid;
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -19,8 +22,10 @@ class EmployerHomePage extends StatelessWidget {
         backgroundColor: AppStyles.appBarColor,
       ),
       body: StreamBuilder(
-        stream:
-            FirebaseFirestore.instance.collection('jobPostings').snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('jobPostings')
+            .where('createrId', isEqualTo: currentUserUid)
+            .snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
@@ -53,6 +58,7 @@ class EmployerHomePage extends StatelessWidget {
                       child: ListTile(
                         title: Text(jobPosting['jobTitle']),
                         subtitle: Text(jobPosting['companyName']),
+                        trailing: Icon(Icons.arrow_forward),
                       ),
                     ),
                   ),

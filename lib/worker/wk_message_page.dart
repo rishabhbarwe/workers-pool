@@ -12,7 +12,7 @@ class WorkerMessagePage extends StatefulWidget {
 }
 
 class _WorkerMessagePageState extends State<WorkerMessagePage> {
-  late List<DocumentSnapshot> requests;
+   late List<DocumentSnapshot> requests;
 
   @override
   void initState() {
@@ -49,8 +49,11 @@ class _WorkerMessagePageState extends State<WorkerMessagePage> {
         backgroundColor: AppStyles.appBarColor,
       ),
       // ignore: unnecessary_null_comparison
-      body: requests != null
-          ? ListView.builder(
+      body: requests.isEmpty
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : ListView.builder(
               itemCount: requests.length,
               itemBuilder: (context, index) {
                 DocumentSnapshot request = requests[index];
@@ -88,9 +91,8 @@ class _WorkerMessagePageState extends State<WorkerMessagePage> {
                 );
               },
             )
-          : Center(
-              child: CircularProgressIndicator(),
-            ),
+      
+      ,
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         items: const [

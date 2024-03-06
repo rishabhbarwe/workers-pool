@@ -5,6 +5,7 @@ import 'wk_account_page.dart';
 import 'wk_job_details_page.dart';
 import 'wk_job_history.dart';
 import 'wk_message_page.dart';
+import 'wk_result_page.dart';
 
 class WorkerHomePage extends StatefulWidget {
   @override
@@ -12,7 +13,8 @@ class WorkerHomePage extends StatefulWidget {
 }
 
 class _WorkerHomePageState extends State<WorkerHomePage> {
-  int _selectedIndex = 0; // Initially selected index is 0 (WJobs)
+  int _selectedIndex = 0;
+  late TextEditingController _searchController = TextEditingController();
 
   void _onItemTapped(int index) {
     if (_selectedIndex != index) {
@@ -42,6 +44,27 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
           break;
       }
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _searchJobs(String keyword) {
+    // Perform search query on the jobPosting collection
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => WorkerResultPage(keyword: keyword),
+      ),
+    );
   }
 
   @override
@@ -76,21 +99,33 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
                   ),
                   margin: EdgeInsets.all(16),
                   child: TextField(
+                    cursorColor: Colors.deepPurple,
+                    controller: _searchController,
                     decoration: InputDecoration(
-                      hintText:
-                          'Search Jobs', // Add the search icon (\u{1F50D})
+                      hintText: 'Search Jobs',
                       border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      suffixIcon: IconButton(
+                        icon: Icon(Icons.search),
+                        color: Colors.deepPurple,
+                        onPressed: () {
+                          _searchJobs(_searchController.text);
+                        },
+                      ),
                     ),
+                    onSubmitted: (value) {
+                      _searchJobs(value); // Trigger search on Enter
+                    },
                   ),
                 ),
               ),
             ],
           ),
           SingleChildScrollView(
-            scrollDirection: Axis.horizontal, // Add horizontal scroll
+            scrollDirection: Axis.horizontal,
             child: Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Wrap(
                 spacing: 8,
                 runSpacing: 8,
@@ -112,16 +147,14 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator(); // Display a loading indicator while fetching data
+                  return Center(child: CircularProgressIndicator());
                 }
                 if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
+                  return Center(child: Text('Error: ${snapshot.error}'));
                 }
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return Text(
-                      'No job postings available.'); // Display a message if no data is available
+                  return Center(child: Text('No job postings available.'));
                 }
-                // Display job postings using a ListView.builder or any other widget
                 return ListView.builder(
                   itemCount: snapshot.data!.docs.length,
                   itemBuilder: (context, index) {
@@ -129,46 +162,39 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
                         as Map<String, dynamic>;
                     final job = JobPosting.fromJson(jobData);
 
-                    return Card(
-                      elevation: 2,
-                      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        side: BorderSide(
-                          color: Colors.grey,
-                          width: 1,
-                        ),
-                      ),
-                      child: ListTile(
-                        title: Text(job.jobTitle),
-                        subtitle: Text(job.companyName),
-                        trailing: Icon(Icons.arrow_forward),
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => WorkerJobDetailsPage(
-                                createrId: job.createrId,
-                                jobId: job.jobId, // Pass jobId here
-                                jobTitle: job.jobTitle,
-                                companyName: job.companyName,
-                                jobType: job.jobType,
-                                location: job.location,
-                                jobDescription: job.jobDescription,
-                                experience: job.experience,
-                                qualification: job.qualification,
-                                language: job.language,
-                                jobTiming: job.jobTiming,
-                                jobAddress: job.jobAddress,
-                              ),
-                            ),
-                          );
-                        },
-                        contentPadding: EdgeInsets.all(16),
-                        tileColor: Colors.white,
-                        minVerticalPadding: 0,
-                        dense: true,
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 16.0),
+                      child: Card(
+                        elevation: 2,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
+                        ),
+                        color: Colors.deepPurple[100],
+                        child: ListTile(
+                          title: Text(job.jobTitle),
+                          subtitle: Text(job.companyName),
+                          trailing: Icon(Icons.arrow_forward),
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => WorkerJobDetailsPage(
+                                  createrId: job.createrId,
+                                  jobId: job.jobId,
+                                  jobTitle: job.jobTitle,
+                                  companyName: job.companyName,
+                                  jobType: job.jobType,
+                                  location: job.location,
+                                  jobDescription: job.jobDescription,
+                                  experience: job.experience,
+                                  qualification: job.qualification,
+                                  language: job.language,
+                                  jobTiming: job.jobTiming,
+                                  jobAddress: job.jobAddress,
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     );
@@ -189,7 +215,6 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
           BottomNavigationBarItem(
             icon: Icon(Icons.message),
             label: 'WMessages',
-            //  backgroundColor: Colors.red,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.post_add),
@@ -209,16 +234,7 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
   }
 
   Color _getSelectedColor(int index) {
-    if (index == 0) {
-      return Colors.deepPurple; // Color for WJobs
-    } else if (index == 1) {
-      return Colors.deepPurple; // Color for WMessages
-    } else if (index == 2) {
-      return Colors.deepPurple; // Color for WJob History
-    } else if (index == 3) {
-      return Colors.deepPurple; // Color for WProfile
-    }
-    return AppStyles.appBarColor; // Default color for WJobs
+    return index == _selectedIndex ? Colors.deepPurple : Colors.grey;
   }
 }
 
@@ -232,8 +248,9 @@ class FilterTag extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.grey[200],
+        color: Colors.white30,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.deepPurple, width: 1),
       ),
       child: Text(tag),
     );
@@ -242,21 +259,21 @@ class FilterTag extends StatelessWidget {
 
 class JobPosting {
   final String createrId;
-  final String jobId; // Add jobId field
+  final String jobId;
   final String jobTitle;
   final String companyName;
   final String jobType;
-  final String location; // Add location field
+  final String location;
   final String jobDescription;
-  final String experience; // Add experience field
-  final String qualification; // Add qualification field
-  final String language; // Add language field
-  final String jobTiming; // Add jobTiming field
-  final String jobAddress; // Add jobAddress field
+  final String experience;
+  final String qualification;
+  final String language;
+  final String jobTiming;
+  final String jobAddress;
 
   JobPosting({
     required this.createrId,
-    required this.jobId, // Include jobId in the constructor
+    required this.jobId,
     required this.jobTitle,
     required this.companyName,
     required this.jobType,
@@ -271,7 +288,6 @@ class JobPosting {
 
   factory JobPosting.fromJson(Map<String, dynamic> json) {
     final jobId = json['jobId'];
-// Retrieve jobId from JSON
     final createrId = json['createrId'];
     final jobTitle = json['jobTitle'];
     final companyName = json['companyName'];

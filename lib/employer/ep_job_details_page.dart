@@ -182,6 +182,14 @@ class _EmployerJobDetailsPageState extends State<EmployerJobDetailsPage> {
                   labelText: 'Job ID',
                   filled: true,
                   fillColor: Colors.deepPurple[50],
+                  focusedBorder: OutlineInputBorder(
+                    borderSide:
+                        BorderSide(color: Colors.red), // Change the color here
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide:
+                        BorderSide(color: Colors.grey), // Change the color here
+                  ),
                 ),
                 cursorColor: Colors.deepPurple,
               ),

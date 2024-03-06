@@ -1,244 +1,109 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../style.dart'; // Import your style.dart file
-import '../user_details_page.dart';
-import 'wk_home_page.dart';
-import 'wk_job_history.dart';
-import 'wk_message_page.dart'; // Import your UserDetailsPage
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'worker_result_page.dart'; // Import WorkerResultPage
 
-int _currentIndex = 0;
-
-class WorkerAccountPage extends StatefulWidget {
-  WorkerAccountPage({Key? key}) : super(key: key);
-  // Declare _currentIndex variable to keep track of the selected tab
-  // int _currentIndex = 0;
-
+class WorkerHomePage extends StatefulWidget {
   @override
-  _WorkerAccountPageState createState() => _WorkerAccountPageState();
+  _WorkerHomePageState createState() => _WorkerHomePageState();
 }
 
-class _WorkerAccountPageState extends State<WorkerAccountPage> {
-  String? userName;
-  String? userEmail;
-  String userPhotoURL = 'assets/user.png';
+class _WorkerHomePageState extends State<WorkerHomePage> {
+  late TextEditingController _searchController;
 
   @override
   void initState() {
     super.initState();
-    // Fetch the user's name and email from Firebase when the page loads
-    fetchUserData();
+    _searchController = TextEditingController();
   }
 
-  Future<void> fetchUserData() async {
-    try {
-      // Get the current user's ID from FirebaseAuth
-      String userId = FirebaseAuth.instance.currentUser!.uid;
-
-      // Reference to the Firestore collection containing user data
-      CollectionReference users =
-          FirebaseFirestore.instance.collection('users');
-
-      // Fetch user details from Firestore using the user's ID
-      DocumentSnapshot userDoc = await users.doc(userId).get();
-
-      // Check if the document exists
-      if (userDoc.exists) {
-        // Populate the name and email from the document
-        setState(() {
-          userName = userDoc['name'];
-          userEmail = userDoc['email'];
-        });
-      } else {
-        // Handle the case where the user document does not exist
-        setState(() {
-          userName = 'N/A';
-          userEmail = 'N/A';
-        });
-      }
-    } catch (e) {
-      // Handle errors and show an error message
-      setState(() {
-        userName = 'N/A';
-        userEmail = 'N/A';
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to fetch user details: $e')),
-      );
-    }
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
-  void navigateToUserDetailsPage() async {
-    final result = await Navigator.push(
-      context,
+  void _searchJobs(String keyword) {
+    // Perform search query on the jobPosting collection
+    Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => UserDetailsPage(),
+        builder: (context) => WorkerResultPage(keyword: keyword),
       ),
     );
-
-    if (result != null && result is Map<String, String>) {
-      // Update the user's name and email if they were changed in UserDetailsPage
-      setState(() {
-        userName = result['name'];
-        userEmail = result['email'];
-      });
-    }
-  }
-
-  Widget _buildUserInfoTile(String label, String? value) {
-    return Card(
-      elevation: 2,
-      child: ListTile(
-        title: Text(
-          label,
-          style: AppStyles.textFieldLabel,
-        ),
-        subtitle: GestureDetector(
-          onTap: () {
-            // Navigate to UserDetailsPage when tapping on the email
-            navigateToUserDetailsPage();
-          },
-          child: Text(
-            value ?? 'N/A', // Display 'N/A' if value is null
-            style: TextStyle(fontSize: 16),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void onTabTapped(int index) {
-    // Handle navigation when a tab is tapped
-    setState(() {
-      _currentIndex = index;
-    });
-
-    switch (index) {
-      case 0:
-        // Navigate to Jobs page
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => WorkerHomePage(),
-        ));
-        break;
-      case 1:
-        // Navigate to Messages page
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => WorkerMessagePage(),
-        ));
-        break;
-      case 2:
-        // Navigate to Post Job page
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => WorkerJobHistoryPage(),
-        ));
-        break;
-      case 3:
-        // Navigate to Profile page
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => WorkerAccountPage(),
-        ));
-        break;
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'My Account',
-          style: AppStyles.appBarTitle,
-        ),
-        backgroundColor: AppStyles.appBarColor,
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: CircleAvatar(
-                radius: 30,
-                backgroundImage: AssetImage(userPhotoURL),
-                backgroundColor: Colors.white,
+      // Your existing scaffold code
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 1,
+                        blurRadius: 2,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  margin: EdgeInsets.all(16),
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search Jobs',
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                    ),
+                    onSubmitted: (value) {
+                      _searchJobs(value); // Trigger search on Enter
+                    },
+                  ),
+                ),
               ),
-            ),
-            SizedBox(height: 16),
-            _buildUserInfoTile('Name', userName),
-            SizedBox(height: 8),
-            _buildUserInfoTile('Email', userEmail),
-            SizedBox(height: 20),
-            Text(
-              'Options',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            ListTile(
-              leading: Icon(Icons.help),
-              title: Text('Help'),
-              onTap: () {
-                // Handle navigation to the help page
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.info),
-              title: Text('About Us'),
-              onTap: () {
-                // Handle navigation to the about us page
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.question_answer),
-              title: Text('FAQs'),
-              onTap: () {
-                // Handle navigation to the FAQs page
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.logout),
-              title: Text('Log Out'),
-              onTap: () {
-                // Handle logout here
-              },
-            ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _currentIndex, // Set the current index
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.work),
-            label: 'WJobs',
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.message),
-            label: 'Messages',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.post_add),
-            label: 'Job History',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'WProfile',
-          ),
+          // Your remaining widgets
         ],
-        selectedItemColor: AppStyles.appBarColor,
-        unselectedItemColor: Colors.grey,
-        backgroundColor: Colors.white,
-        onTap: onTabTapped, // Handle tab tap
       ),
     );
   }
 }
-
-// void main() {
-//   runApp(MaterialApp(
-//     home: WorkerAccountPage(),
-//   ));
-// }
+return Container(
+  decoration: BoxDecoration(
+    border: Border.all(color: Colors.grey), // Add border decoration
+    borderRadius: BorderRadius.circular(8), // Add border radius for rounded corners
+  ),
+  child: ListTile(
+    title: Text(jobTitle),
+    subtitle: Text(companyName),
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => WorkerJobDetailsPage(
+            createrId: job.createrId,
+            jobId: job.jobId,
+            jobTitle: job.jobTitle,
+            companyName: job.companyName,
+            jobType: job.jobType,
+            location: job.location,
+            jobDescription: job.jobDescription,
+            experience: job.experience,
+            qualification: job.qualification,
+            language: job.language,
+            jobTiming: job.jobTiming,
+            jobAddress: job.jobAddress,
+          ),
+        ),
+      );
+    },
+  ),
+);
