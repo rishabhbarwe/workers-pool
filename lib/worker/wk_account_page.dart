@@ -1,13 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../main.dart';
 import '../style.dart'; // Import your style.dart file
 import '../user_details_page.dart';
 import 'wk_home_page.dart';
 import 'wk_job_history.dart';
 import 'wk_message_page.dart'; // Import your UserDetailsPage
 
-int _currentIndex = 0;
+int _acurrentIndex = 0;
 
 class WorkerAccountPage extends StatefulWidget {
   WorkerAccountPage({Key? key}) : super(key: key);
@@ -111,7 +112,7 @@ class _WorkerAccountPageState extends State<WorkerAccountPage> {
   void onTabTapped(int index) {
     // Handle navigation when a tab is tapped
     setState(() {
-      _currentIndex = index;
+      _acurrentIndex = index;
     });
 
     switch (index) {
@@ -139,6 +140,23 @@ class _WorkerAccountPageState extends State<WorkerAccountPage> {
           builder: (context) => WorkerAccountPage(),
         ));
         break;
+    }
+  }
+
+  void _logout() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      // Navigate to the login page with a new session
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => AuthenticationPage()),
+        (Route<dynamic> route) => false, // Flush the navigation routes
+      );
+    } catch (e) {
+      print('Error logging out: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to log out')),
+      );
     }
   }
 
@@ -200,16 +218,14 @@ class _WorkerAccountPageState extends State<WorkerAccountPage> {
             ListTile(
               leading: Icon(Icons.logout),
               title: Text('Log Out'),
-              onTap: () {
-                // Handle logout here
-              },
+              onTap: _logout,
             ),
           ],
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        currentIndex: _currentIndex, // Set the current index
+        currentIndex: 3, // Set the current index
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.work),

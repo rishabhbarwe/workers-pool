@@ -12,7 +12,7 @@ class WorkerMessagePage extends StatefulWidget {
 }
 
 class _WorkerMessagePageState extends State<WorkerMessagePage> {
-   late List<DocumentSnapshot> requests;
+  late List<DocumentSnapshot> requests = [];
 
   @override
   void initState() {
@@ -49,50 +49,52 @@ class _WorkerMessagePageState extends State<WorkerMessagePage> {
         backgroundColor: AppStyles.appBarColor,
       ),
       // ignore: unnecessary_null_comparison
-      body: requests.isEmpty
+      body: requests == null
           ? Center(
               child: CircularProgressIndicator(),
             )
-          : ListView.builder(
-              itemCount: requests.length,
-              itemBuilder: (context, index) {
-                DocumentSnapshot request = requests[index];
-                String status = request['status'] ?? 'PENDING';
-                return Padding(
-                  padding: EdgeInsets.all(1.0),
-                  child: Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      side: BorderSide(color: Colors.grey.shade300),
-                    ),
-                    child: ListTile(
-                      title: status == 'PENDING'
-                          ? Text(
-                              'The other user has not responded to this request.',
-                              style: TextStyle(
-                                fontStyle: FontStyle.italic,
-                                color: Colors.grey,
-                              ),
-                            )
-                          : Text(
-                              'Request status: $status',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: status == 'ACCEPTED'
-                                    ? Colors.green
-                                    : Colors.red,
-                              ),
-                            ),
-                      tileColor:
-                          status == 'PENDING' ? Colors.yellow[100] : null,
-                      contentPadding: EdgeInsets.all(12),
-                    ),
-                  ),
-                );
-              },
-            )
-      
-      ,
+          : requests.isEmpty
+              ? Center(
+                  child: Text('No requests found'),
+                )
+              : ListView.builder(
+                  itemCount: requests.length,
+                  itemBuilder: (context, index) {
+                    DocumentSnapshot request = requests[index];
+                    String status = request['status'] ?? 'PENDING';
+                    return Padding(
+                      padding: EdgeInsets.all(1.0),
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          side: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        child: ListTile(
+                          title: status == 'PENDING'
+                              ? Text(
+                                  'The other user has not responded to this request.',
+                                  style: TextStyle(
+                                    fontStyle: FontStyle.italic,
+                                    color: Colors.grey,
+                                  ),
+                                )
+                              : Text(
+                                  'Request status: $status',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: status == 'ACCEPTED'
+                                        ? Colors.green
+                                        : Colors.red,
+                                  ),
+                                ),
+                          tileColor:
+                              status == 'PENDING' ? Colors.yellow[100] : null,
+                          contentPadding: EdgeInsets.all(12),
+                        ),
+                      ),
+                    );
+                  },
+                ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         items: const [
@@ -117,6 +119,7 @@ class _WorkerMessagePageState extends State<WorkerMessagePage> {
         selectedItemColor: AppStyles.appBarColor,
         unselectedItemColor: Colors.grey,
         backgroundColor: Colors.white,
+        currentIndex: 1,
         onTap: (index) {
           if (index == 0) {
             // Navigate to the WorkerHomePage when the job icon is tapped

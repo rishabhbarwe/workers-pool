@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:mark_5/employer/ep_home_page.dart';
 import 'package:mark_5/employer/ep_message_page.dart';
 import 'package:mark_5/postjob_page.dart';
-import '../style.dart'; // Import your style.dart file
-import '../user_details_page.dart'; // Import your UserDetailsPage
+// import '../login_form.dart';
+import '../main.dart';
+import '../style.dart';
+import '../user_details_page.dart';
 
-int _currentIndex = 0;
+int _acurrentIndex = 0;
 
 class EmployerAccountPage extends StatefulWidget {
   EmployerAccountPage({Key? key}) : super(key: key);
@@ -96,7 +98,7 @@ class _EmployerAccountPageState extends State<EmployerAccountPage> {
 
   void onTabTapped(int index) {
     setState(() {
-      _currentIndex = index;
+      _acurrentIndex = index;
     });
 
     switch (index) {
@@ -115,9 +117,23 @@ class _EmployerAccountPageState extends State<EmployerAccountPage> {
           builder: (context) => PostJobPage(),
         ));
         break;
-      case 3:
-        // This is already the current page, no need to navigate
-        break;
+    }
+  }
+
+  void _logout() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      // Navigate to the login page with a new session
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => AuthenticationPage()),
+        (Route<dynamic> route) => false, // Flush the navigation routes
+      );
+    } catch (e) {
+      print('Error logging out: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to log out')),
+      );
     }
   }
 
@@ -173,14 +189,14 @@ class _EmployerAccountPageState extends State<EmployerAccountPage> {
             ListTile(
               leading: Icon(Icons.logout),
               title: Text('Log Out'),
-              onTap: () {},
+              onTap: _logout,
             ),
           ],
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        currentIndex: _currentIndex,
+        currentIndex: 3,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.work),

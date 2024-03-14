@@ -1,3 +1,6 @@
+// ignore_for_file: unused_local_variable
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'email_verification_page.dart';
@@ -9,6 +12,9 @@ class SignupForm extends StatefulWidget {
 }
 
 class _SignupFormState extends State<SignupForm> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _phoneNumberController = TextEditingController();
@@ -26,6 +32,16 @@ class _SignupFormState extends State<SignupForm> {
       if (user != null && !user.emailVerified) {
         await user.sendEmailVerification();
       }
+      // Save user details to Firestore
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_auth.currentUser!.uid)
+          .set({
+        'email': _emailController.text,
+        'phoneNumber': _phoneNumberController.text,
+        'role': _selectedRole,
+      });
 
       // Navigate to the email verification page
       Navigator.of(context).pushReplacement(

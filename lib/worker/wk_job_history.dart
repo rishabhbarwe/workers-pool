@@ -49,21 +49,19 @@ class WorkerJobHistoryPage extends StatelessWidget {
         selectedItemColor: AppStyles.appBarColor,
         unselectedItemColor: Colors.grey,
         backgroundColor: Colors.white,
+        currentIndex: 2,
         onTap: (index) {
           if (index == 0) {
-            // Navigate to the WorkerHomePage when the job icon is tapped
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(builder: (context) => WorkerHomePage()),
             );
           }
           if (index == 1) {
-            // Navigate to the WorkerMessagePage when the message icon is tapped
             Navigator.of(context).push(
               MaterialPageRoute(builder: (context) => WorkerMessagePage()),
             );
           }
           if (index == 3) {
-            // Navigate to the WorkerAccountPage when the profile icon is tapped
             Navigator.of(context).push(
               MaterialPageRoute(builder: (context) => WorkerAccountPage()),
             );

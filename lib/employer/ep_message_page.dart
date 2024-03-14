@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../postjob_page.dart';
 import '../style.dart';
+import 'ep_account_page.dart';
+import 'ep_home_page.dart';
 
 class EmployerMessagePage extends StatefulWidget {
   @override
@@ -9,7 +12,35 @@ class EmployerMessagePage extends StatefulWidget {
 }
 
 class _EmployerMessagePageState extends State<EmployerMessagePage> {
-  late List<DocumentSnapshot> requests;
+  late List<DocumentSnapshot> requests = [];
+  // ignore: unused_field
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    if (index == 1) {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => EmployerMessagePage()),
+      );
+    }
+    if (index == 0) {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => EmployerHomePage()),
+      );
+    }
+    if (index == 2) {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => PostJobPage()),
+      );
+    }
+    if (index == 3) {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => EmployerAccountPage()),
+      );
+    }
+  }
 
   @override
   void initState() {
@@ -42,14 +73,14 @@ class _EmployerMessagePageState extends State<EmployerMessagePage> {
           .doc(requestId)
           .update({'status': 'ACCEPTED'}); // Update the request status
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Request accepted')),
+        const SnackBar(content: Text('Request accepted')),
       );
       // Fetch updated requests
       fetchRequests();
     } catch (e) {
       print('Error accepting request: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to accept request')),
+        const SnackBar(content: Text('Failed to accept request')),
       );
     }
   }
@@ -61,14 +92,14 @@ class _EmployerMessagePageState extends State<EmployerMessagePage> {
           .doc(requestId)
           .update({'status': 'REJECTED'}); // Update the request status
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Request rejected')),
+        const SnackBar(content: Text('Request rejected')),
       );
       // Fetch updated requests
       fetchRequests();
     } catch (e) {
       print('Error rejecting request: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to reject request')),
+        const SnackBar(content: Text('Failed to reject request')),
       );
     }
   }
@@ -110,14 +141,14 @@ class _EmployerMessagePageState extends State<EmployerMessagePage> {
                   future: fetchSenderName(requests[index]['senderId']),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return CircularProgressIndicator();
+                      return const CircularProgressIndicator();
                     } else if (snapshot.hasError) {
                       return Text('Error: ${snapshot.error}');
                     } else {
                       String senderName = snapshot.data.toString();
                       return Container(
-                        margin:
-                            EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                        margin: const EdgeInsets.symmetric(
+                            vertical: 8, horizontal: 16),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(10),
@@ -126,14 +157,14 @@ class _EmployerMessagePageState extends State<EmployerMessagePage> {
                               color: Colors.grey.withOpacity(0.5),
                               spreadRadius: 1,
                               blurRadius: 2,
-                              offset: Offset(0, 2),
+                              offset: const Offset(0, 2),
                             ),
                           ],
                         ),
                         child: ListTile(
                           title: Text(
                             'Request from: $senderName',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: Colors.black,
@@ -146,9 +177,10 @@ class _EmployerMessagePageState extends State<EmployerMessagePage> {
                                 onPressed: () => acceptRequest(requestId),
                                 style: ElevatedButton.styleFrom(
                                   primary: Colors.green,
-                                  padding: EdgeInsets.symmetric(horizontal: 16),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
                                 ),
-                                child: Text(
+                                child: const Text(
                                   'Accept',
                                   style: TextStyle(
                                     fontSize: 14,
@@ -157,14 +189,15 @@ class _EmployerMessagePageState extends State<EmployerMessagePage> {
                                   ),
                                 ),
                               ),
-                              SizedBox(width: 8),
+                              const SizedBox(width: 8),
                               ElevatedButton(
                                 onPressed: () => rejectRequest(requestId),
                                 style: ElevatedButton.styleFrom(
                                   primary: Colors.red,
-                                  padding: EdgeInsets.symmetric(horizontal: 16),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
                                 ),
-                                child: Text(
+                                child: const Text(
                                   'Reject',
                                   style: TextStyle(
                                     fontSize: 14,
@@ -182,9 +215,37 @@ class _EmployerMessagePageState extends State<EmployerMessagePage> {
                 );
               },
             )
-          : Center(
+          : const Center(
               child: CircularProgressIndicator(),
             ),
+
+      // _pages[_selectedIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.work),
+            label: 'Edit Jobs',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.message),
+            label: 'Messages',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.post_add),
+            label: 'Post Job',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'EProfile',
+          ),
+        ],
+        selectedItemColor: AppStyles.appBarColor,
+        unselectedItemColor: Colors.grey,
+        backgroundColor: Colors.white,
+        currentIndex: 1,
+        onTap: _onItemTapped,
+      ),
     );
   }
 }

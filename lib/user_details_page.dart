@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'style.dart'; // Import your style.dart file
+import 'style.dart';
 
 class UserDetailsPage extends StatefulWidget {
   UserDetailsPage({Key? key}) : super(key: key);
@@ -66,18 +66,34 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
       final User? currentUser = _auth.currentUser;
 
       if (currentUser != null) {
-        // Update the user's details in Firestore
+        // Fetch user details from Firestore to get existing values
+        DocumentSnapshot userDoc =
+            await _firestore.collection('users').doc(currentUser.uid).get();
+
+        // Get existing values or use new values if they're not present
+        String existingEmail = userDoc.exists ? userDoc['email'] ?? '' : '';
+        String existingPhoneNumber =
+            userDoc.exists ? userDoc['phoneNumber'] ?? '' : '';
+        String existingRole = userDoc.exists ? userDoc['role'] ?? '' : '';
+
+        // Update the user's details in Firestore with both existing and new values
         await _firestore.collection('users').doc(currentUser.uid).set({
           'userId': currentUser.uid, // Add userId field to store current UID
           'name': nameController.text,
-          'email': emailController.text,
-          'phoneNumber': phoneNumberController.text,
+          'email':
+              existingEmail.isNotEmpty ? existingEmail : emailController.text,
+          'phoneNumber': existingPhoneNumber.isNotEmpty
+              ? existingPhoneNumber
+              : phoneNumberController.text,
           'gender': selectedGender ?? '',
           'age': ageController.text,
           'education': educationController.text,
           'bio': bioController.text,
-          'role': selectedRole, // Save the selected role to Firestore
+          'role': existingRole.isNotEmpty
+              ? existingRole
+              : selectedRole, // Preserve existing role if available
         });
+
         Navigator.pop(context,
             {'name': nameController.text, 'email': emailController.text});
         // Show a success message
@@ -151,12 +167,16 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
                 decoration: AppStyles.textFieldDecoration.copyWith(
                   hintText: 'Select gender',
                 ),
-                items: ['Male', 'Female']
-                    .map((gender) => DropdownMenuItem<String>(
-                          value: gender,
-                          child: Text(gender),
-                        ))
-                    .toList(),
+                items: [
+                  DropdownMenuItem(
+                    value: 'Male', // Ensure this value is unique
+                    child: Text('Male'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'Female', // Ensure this value is unique
+                    child: Text('Female'),
+                  ),
+                ],
                 onChanged: (value) {
                   setState(() {
                     selectedGender = value;
@@ -173,12 +193,16 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
                 decoration: AppStyles.textFieldDecoration.copyWith(
                   hintText: 'Select role',
                 ),
-                items: ['Worker', 'Employer']
-                    .map((role) => DropdownMenuItem<String>(
-                          value: role,
-                          child: Text(role),
-                        ))
-                    .toList(),
+                items: [
+                  DropdownMenuItem(
+                    value: 'worker', // Ensure this value is unique
+                    child: Text('Worker'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'employer', // Ensure this value is unique
+                    child: Text('Employer'),
+                  ),
+                ],
                 onChanged: (value) {
                   setState(() {
                     selectedRole = value;
