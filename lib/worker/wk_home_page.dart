@@ -15,6 +15,7 @@ class WorkerHomePage extends StatefulWidget {
 class _WorkerHomePageState extends State<WorkerHomePage> {
   int _selectedIndex = 0;
   late TextEditingController _searchController = TextEditingController();
+  String? _selectedJobType;
 
   void _onItemTapped(int index) {
     if (_selectedIndex != index) {
@@ -50,6 +51,7 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
   void initState() {
     super.initState();
     _searchController = TextEditingController();
+    _selectedJobType = null;
   }
 
   @override
@@ -65,6 +67,18 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
         builder: (context) => WorkerResultPage(keyword: keyword),
       ),
     );
+  }
+
+  void _filterJobsByType(String jobType) {
+    setState(() {
+      _selectedJobType = jobType; // Update selected job type
+    });
+  }
+
+  void _clearFilters() {
+    setState(() {
+      _selectedJobType = null; // Clear selected job type
+    });
   }
 
   @override
@@ -130,21 +144,60 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  FilterTag(tag: 'Home'),
-                  FilterTag(tag: 'Construction'),
-                  FilterTag(tag: 'Outdoor'),
-                  FilterTag(tag: 'Shop'),
-                  FilterTag(tag: 'Childcare'),
-                  FilterTag(tag: 'Security'),
+                  FilterTag(
+                    tag: 'Clear Filters',
+                    isSelected: _selectedJobType == null,
+                    onTap: _clearFilters,
+                  ),
+                  FilterTag(
+                    tag: 'Home',
+                    isSelected: _selectedJobType == 'Home',
+                    onTap: () => _filterJobsByType('Home'),
+                  ),
+                  FilterTag(
+                    tag: 'Construction',
+                    isSelected: _selectedJobType == 'Construction',
+                    onTap: () => _filterJobsByType('Construction'),
+                  ),
+                  FilterTag(
+                    tag: 'Shop',
+                    isSelected: _selectedJobType == 'Shop',
+                    onTap: () => _filterJobsByType('Shop'),
+                  ),
+                  FilterTag(
+                    tag: 'Outdoor',
+                    isSelected: _selectedJobType == 'Outdoor',
+                    onTap: () => _filterJobsByType('Outdoor'),
+                  ),
+                  FilterTag(
+                    tag: 'Childcare',
+                    isSelected: _selectedJobType == 'Childcare',
+                    onTap: () => _filterJobsByType('Childcare'),
+                  ),
+                  FilterTag(
+                    tag: 'Security',
+                    isSelected: _selectedJobType == 'Security',
+                    onTap: () => _filterJobsByType('Security'),
+                  ),
+                  FilterTag(
+                    tag: 'Electrical',
+                    isSelected: _selectedJobType == 'Electrical',
+                    onTap: () => _filterJobsByType('Electrical'),
+                  ),
                 ],
               ),
             ),
           ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('jobPostings')
-                  .snapshots(),
+              stream: _selectedJobType != null
+                  ? FirebaseFirestore.instance
+                      .collection('jobPostings')
+                      .where('jobType', isEqualTo: _selectedJobType)
+                      .snapshots()
+                  : FirebaseFirestore.instance
+                      .collection('jobPostings')
+                      .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: CircularProgressIndicator());
@@ -240,19 +293,36 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
 
 class FilterTag extends StatelessWidget {
   final String tag;
+  final bool isSelected;
+  final VoidCallback? onTap;
 
-  FilterTag({required this.tag});
+  FilterTag({
+    required this.tag,
+    required this.isSelected,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white30,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.deepPurple, width: 1),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.deepPurple : Colors.white30,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: Colors.deepPurple,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Text(
+          tag,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.black,
+          ),
+        ),
       ),
-      child: Text(tag),
     );
   }
 }

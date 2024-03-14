@@ -1,12 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mark_5/signup_form.dart';
-// ignore: unused_import
-import 'package:shared_preferences/shared_preferences.dart';
 import 'worker/wk_home_page.dart';
 import 'employer/ep_home_page.dart';
-import 'style.dart'; // Import the style.dart file
+import 'style.dart';
 
 class LoginForm extends StatefulWidget {
   @override
@@ -16,7 +14,17 @@ class LoginForm extends StatefulWidget {
 class _LoginFormState extends State<LoginForm> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  // String? _selectedRole;
+  late User? _user;
+
+  @override
+  void initState() {
+    super.initState();
+    // Check if user is already signed in
+    _user = FirebaseAuth.instance.currentUser;
+    if (_user != null) {
+      _redirectUser();
+    }
+  }
 
   Future<void> _login() async {
     try {
@@ -26,59 +34,55 @@ class _LoginFormState extends State<LoginForm> {
         password: _passwordController.text,
       );
 
-      // Check if login was successful
       if (userCredential.user != null) {
-        // Fetch user role from Firestore
-        String userRole = await _fetchUserRole(userCredential.user!.uid);
-
-        // Redirect based on the user's role
-        if (userRole == 'worker') {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => WorkerHomePage()),
-          );
-        } else if (userRole == 'employer') {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => EmployerHomePage()),
-          );
-        } else {
-          // Show a warning if the user has no role or an unknown role
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Invalid user role.'),
-            ),
-          );
-        }
-      } else {
-        // Show a warning for invalid email or password
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Invalid email or password.'),
-          ),
-        );
+        setState(() {
+          _user = userCredential.user;
+        });
+        _redirectUser();
       }
     } catch (e) {
-      // Handle other login errors here
       print(e.toString());
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Invalid email or password.'),
+        ),
+      );
     }
   }
 
   Future<String> _fetchUserRole(String userId) async {
     try {
-      // Fetch user data from Firestore
       DocumentSnapshot userDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(userId)
           .get();
       if (userDoc.exists) {
-        // Return the user's role
         return userDoc['role'];
       } else {
         return '';
       }
     } catch (e) {
-      // Handle errors
       print('Error fetching user role: $e');
       return '';
+    }
+  }
+
+  void _redirectUser() async {
+    String userRole = await _fetchUserRole(_user!.uid);
+    if (userRole == 'worker') {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => WorkerHomePage()),
+      );
+    } else if (userRole == 'employer') {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => EmployerHomePage()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Invalid user role.'),
+        ),
+      );
     }
   }
 
@@ -99,11 +103,11 @@ class _LoginFormState extends State<LoginForm> {
           Text(
             'Log in',
             style: TextStyle(
-              fontSize: 24, // Adjust the font size as needed
-              fontWeight: FontWeight.bold, // Use bold font
-              color: Colors.deepPurple, // Text color
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.deepPurple,
             ),
-            textAlign: TextAlign.center, // Center the text
+            textAlign: TextAlign.center,
           ),
           SizedBox(height: 20),
           TextField(
@@ -125,12 +129,12 @@ class _LoginFormState extends State<LoginForm> {
           SizedBox(height: 20),
           ElevatedButton(
             onPressed: _login,
-            style: AppStyles.primaryButtonStyle, // Apply button style
+            style: AppStyles.primaryButtonStyle,
             child: Text('Log in'),
           ),
           TextButton(
-            onPressed: _navigateToSignupPage, // Navigate to signup page
-            child: Text('.'),
+            onPressed: _navigateToSignupPage,
+            child: Text(''),
           ),
         ],
       ),

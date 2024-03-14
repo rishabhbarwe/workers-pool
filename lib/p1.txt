@@ -1,10 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mark_5/signup_form.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+// ignore: unused_import
+import 'package:shared_preferences/shared_preferences.dart';
 import 'worker/wk_home_page.dart';
 import 'employer/ep_home_page.dart';
-import 'style.dart'; 
+import 'style.dart'; // Import the style.dart file
 
 class LoginForm extends StatefulWidget {
   @override
@@ -14,10 +16,14 @@ class LoginForm extends StatefulWidget {
 class _LoginFormState extends State<LoginForm> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  // String? _selectedRole;
+
+  
 
   Future<void> _login() async {
     try {
-      final userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+      final userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
       );
@@ -61,7 +67,10 @@ class _LoginFormState extends State<LoginForm> {
   Future<String> _fetchUserRole(String userId) async {
     try {
       // Fetch user data from Firestore
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
       if (userDoc.exists) {
         // Return the user's role
         return userDoc['role'];
@@ -92,11 +101,11 @@ class _LoginFormState extends State<LoginForm> {
           Text(
             'Log in',
             style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.deepPurple,
+              fontSize: 24, // Adjust the font size as needed
+              fontWeight: FontWeight.bold, // Use bold font
+              color: Colors.deepPurple, // Text color
             ),
-            textAlign: TextAlign.center,
+            textAlign: TextAlign.center, // Center the text
           ),
           SizedBox(height: 20),
           TextField(
@@ -118,12 +127,12 @@ class _LoginFormState extends State<LoginForm> {
           SizedBox(height: 20),
           ElevatedButton(
             onPressed: _login,
-            style: AppStyles.primaryButtonStyle,
+            style: AppStyles.primaryButtonStyle, // Apply button style
             child: Text('Log in'),
           ),
           TextButton(
-            onPressed: _navigateToSignupPage,
-            child: Text('Sign Up'),
+            onPressed: _navigateToSignupPage, // Navigate to signup page
+            child: Text('.'),
           ),
         ],
       ),

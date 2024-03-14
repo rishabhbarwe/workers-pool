@@ -1,233 +1,32 @@
-import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'style.dart'; 
-class UserDetailsPage extends StatefulWidget {
-  UserDetailsPage({Key? key}) : super(key: key);
+class FilterTag extends StatelessWidget {
+  final String tag;
+  final bool isSelected;
+  final VoidCallback? onTap;
 
-  @override
-  _UserDetailsPageState createState() => _UserDetailsPageState();
-}
-
-class _UserDetailsPageState extends State<UserDetailsPage> {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  TextEditingController nameController = TextEditingController();
-  TextEditingController emailController = TextEditingController();
-  TextEditingController phoneNumberController = TextEditingController();
-  String? selectedGender;
-  TextEditingController ageController = TextEditingController();
-  TextEditingController educationController = TextEditingController();
-  TextEditingController bioController = TextEditingController();
-  String? selectedRole; 
-
-  @override
-  void initState() {
-    super.initState();
-    // Fetch the user's details from Firestore when the page loads
-    fetchUserDetails();
-  }
-
-  Future<void> fetchUserDetails() async {
-    try {
-      // Get the current user's ID from FirebaseAuth
-      final User? currentUser = _auth.currentUser;
-
-      if (currentUser != null) {
-        // Fetch user details from Firestore
-        DocumentSnapshot userDoc =
-            await _firestore.collection('users').doc(currentUser.uid).get();
-
-        // Populate the text fields with the retrieved data
-        setState(() {
-          nameController.text = userDoc['name'] ?? '';
-          emailController.text = userDoc['email'] ?? '';
-          phoneNumberController.text = userDoc['phoneNumber'] ?? '';
-          selectedGender = userDoc['gender'];
-          ageController.text = userDoc['age'] ?? '';
-          educationController.text = userDoc['education'] ?? '';
-          bioController.text = userDoc['bio'] ?? '';
-          selectedRole = userDoc['role']; // Fetch the role from Firestore
-        });
-      }
-    } catch (e) {
-      // Handle errors and show an error message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to fetch user details: $e')),
-      );
-    }
-  }
-
-  void saveChanges() async {
-    try {
-      // Get the current user's ID from FirebaseAuth
-      final User? currentUser = _auth.currentUser;
-
-      if (currentUser != null) {
-        // Update the user's details in Firestore
-        await _firestore.collection('users').doc(currentUser.uid).set({
-          'name': nameController.text,
-          'email': emailController.text,
-          'phoneNumber': phoneNumberController.text,
-          'gender': selectedGender ?? '',
-          'age': ageController.text,
-          'education': educationController.text,
-          'bio': bioController.text,
-          'role': selectedRole, // Save the selected role to Firestore
-        });
-        Navigator.pop(context,
-            {'name': nameController.text, 'email': emailController.text});
-        // Show a success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Changes saved successfully')),
-        );
-      }
-    } catch (e) {
-      // Handle errors and show an error message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save changes: $e')),
-      );
-    }
-  }
+  FilterTag({
+    required this.tag,
+    required this.isSelected,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Edit User Details',
-          style: AppStyles.appBarTitle,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.deepPurple : Colors.white30,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? Colors.deepPurple : Colors.deepPurple.withOpacity(0.5),
+            width: isSelected ? 2 : 1,
+          ),
         ),
-        backgroundColor: AppStyles.appBarColor,
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Name',
-                style: AppStyles.textFieldLabel,
-              ),
-              TextFormField(
-                controller: nameController,
-                decoration: AppStyles.textFieldDecoration.copyWith(
-                  hintText: 'Enter your name',
-                ),
-              ),
-              SizedBox(height: 16.0),
-              Text(
-                'Email',
-                style: AppStyles.textFieldLabel,
-              ),
-              TextFormField(
-                controller: emailController,
-                decoration: AppStyles.textFieldDecoration.copyWith(
-                  hintText: 'Enter your email',
-                ),
-              ),
-              SizedBox(height: 16.0),
-              Text(
-                'Phone Number',
-                style: AppStyles.textFieldLabel,
-              ),
-              TextFormField(
-                controller: phoneNumberController,
-                decoration: AppStyles.textFieldDecoration.copyWith(
-                  hintText: 'Enter your phone number',
-                ),
-              ),
-              SizedBox(height: 16.0),
-              Text(
-                'Gender',
-                style: AppStyles.textFieldLabel,
-              ),
-              DropdownButtonFormField<String>(
-                value: selectedGender,
-                decoration: AppStyles.textFieldDecoration.copyWith(
-                  hintText: 'Select gender',
-                ),
-                items: ['Male', 'Female']
-                    .map((gender) => DropdownMenuItem<String>(
-                          value: gender,
-                          child: Text(gender),
-                        ))
-                    .toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedGender = value;
-                  });
-                },
-              ),
-              SizedBox(height: 16.0),
-              Text(
-                'Role',
-                style: AppStyles.textFieldLabel,
-              ),
-              DropdownButtonFormField<String>(
-                value: selectedRole,
-                decoration: AppStyles.textFieldDecoration.copyWith(
-                  hintText: 'Select role',
-                ),
-                items: ['Worker', 'Employer']
-                    .map((role) => DropdownMenuItem<String>(
-                          value: role,
-                          child: Text(role),
-                        ))
-                    .toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedRole = value;
-                  });
-                },
-              ),
-              SizedBox(height: 16.0),
-              Text(
-                'Age',
-                style: AppStyles.textFieldLabel,
-              ),
-              TextFormField(
-                controller: ageController,
-                keyboardType: TextInputType.number,
-                decoration: AppStyles.textFieldDecoration.copyWith(
-                  hintText: 'Enter your age',
-                ),
-              ),
-              SizedBox(height: 16.0),
-              Text(
-                'Education',
-                style: AppStyles.textFieldLabel,
-              ),
-              TextFormField(
-                controller: educationController,
-                decoration: AppStyles.textFieldDecoration.copyWith(
-                  hintText: 'Enter your education',
-                ),
-              ),
-              SizedBox(height: 16.0),
-              Text(
-                'Bio',
-                style: AppStyles.textFieldLabel,
-              ),
-              TextFormField(
-                controller: bioController,
-                maxLines: 4,
-                decoration: AppStyles.textFieldDecoration.copyWith(
-                  hintText: 'Enter your bio',
-                ),
-              ),
-              SizedBox(height: 16.0),
-              ElevatedButton(
-                onPressed: () {
-                  // Call the function to save changes when the button is pressed
-                  saveChanges();
-                },
-                style: AppStyles.primaryButtonStyle,
-                child: Text('Save Changes'),
-              ),
-            ],
+        child: Text(
+          tag,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.black,
           ),
         ),
       ),
@@ -235,8 +34,96 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
   }
 }
 
-void main() {
-  runApp(MaterialApp(
-    home: UserDetailsPage(),
-  ));
+class _WorkerHomePageState extends State<WorkerHomePage> {
+  int _selectedIndex = 0;
+  late TextEditingController _searchController = TextEditingController();
+  String? _selectedJobType;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+    _selectedJobType = null;
+  }
+
+  // Other methods remain the same
+
+  void _filterJobsByType(String jobType) {
+    setState(() {
+      _selectedJobType = jobType; // Update selected job type
+    });
+  }
+
+  void _clearFilters() {
+    setState(() {
+      _selectedJobType = null; // Clear selected job type
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Text(
+          'Work1 Daily',
+          style: AppStyles.appBarTitle,
+        ),
+        backgroundColor: AppStyles.appBarColor,
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Other widgets remain the same
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  FilterTag(
+                    tag: 'Home',
+                    isSelected: _selectedJobType == null,
+                    onTap: _clearFilters,
+                  ),
+                  FilterTag(
+                    tag: 'Construction',
+                    isSelected: _selectedJobType == 'Construction',
+                    onTap: () => _filterJobsByType('Construction'),
+                  ),
+                  // Add other FilterTag widgets for each job type
+                  // Example:
+                  // FilterTag(
+                  //   tag: 'Outdoor',
+                  //   isSelected: _selectedJobType == 'Outdoor',
+                  //   onTap: () => _filterJobsByType('Outdoor'),
+                  // ),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: _selectedJobType != null
+                  ? FirebaseFirestore.instance
+                      .collection('jobPostings')
+                      .where('jobType', isEqualTo: _selectedJobType)
+                      .snapshots()
+                  : FirebaseFirestore.instance
+                      .collection('jobPostings')
+                      .snapshots(),
+              builder: (context, snapshot) {
+                // Builder logic remains the same
+              },
+            ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        // Bottom navigation bar logic remains the same
+      ),
+    );
+  }
 }
