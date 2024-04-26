@@ -38,6 +38,25 @@ class _WorkerMessagePageState extends State<WorkerMessagePage> {
     }
   }
 
+  void deleteRequest(String requestId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('requests')
+          .doc(requestId)
+          .delete();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Request deleted')),
+      );
+      // Fetch updated requests
+      fetchRequests();
+    } catch (e) {
+      print('Error deleting request: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to delete request')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,34 +81,49 @@ class _WorkerMessagePageState extends State<WorkerMessagePage> {
                   itemBuilder: (context, index) {
                     DocumentSnapshot request = requests[index];
                     String status = request['status'] ?? 'PENDING';
-                    return Padding(
-                      padding: EdgeInsets.all(1.0),
-                      child: Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          side: BorderSide(color: Colors.grey.shade300),
+                    return Dismissible(
+                      key: Key(request.id),
+                      direction: DismissDirection.endToStart,
+                      background: Container(
+                        color: Colors.red,
+                        alignment: Alignment.centerRight,
+                        padding: EdgeInsets.only(right: 20),
+                        child: Icon(
+                          Icons.delete,
+                          color: Colors.white,
                         ),
-                        child: ListTile(
-                          title: status == 'PENDING'
-                              ? Text(
-                                  'The other user has not responded to this request.',
-                                  style: TextStyle(
-                                    fontStyle: FontStyle.italic,
-                                    color: Colors.grey,
+                      ),
+                      onDismissed: (direction) {
+                        deleteRequest(request.id);
+                      },
+                      child: Padding(
+                        padding: EdgeInsets.all(1.0),
+                        child: Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            side: BorderSide(color: Colors.grey.shade300),
+                          ),
+                          child: ListTile(
+                            title: status == 'PENDING'
+                                ? Text(
+                                    'The other user has not responded to this request.',
+                                    style: TextStyle(
+                                      color: Colors.grey,
+                                    ),
+                                  )
+                                : Text(
+                                    'Request status: $status',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: status == 'ACCEPTED'
+                                          ? Colors.green
+                                          : Colors.red,
+                                    ),
                                   ),
-                                )
-                              : Text(
-                                  'Request status: $status',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: status == 'ACCEPTED'
-                                        ? Colors.green
-                                        : Colors.red,
-                                  ),
-                                ),
-                          tileColor:
-                              status == 'PENDING' ? Colors.yellow[100] : null,
-                          contentPadding: EdgeInsets.all(12),
+                            tileColor:
+                                status == 'PENDING' ? Colors.yellow[100] : null,
+                            contentPadding: EdgeInsets.all(12),
+                          ),
                         ),
                       ),
                     );
@@ -104,8 +138,7 @@ class _WorkerMessagePageState extends State<WorkerMessagePage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.message),
-            label: 'WMessages',
-            //  backgroundColor: Colors.red,
+            label: 'WRequests',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.post_add),

@@ -17,11 +17,12 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
   TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController phoneNumberController = TextEditingController();
-  String? selectedGender;
+  // String? selectedGender;
   TextEditingController ageController = TextEditingController();
   TextEditingController educationController = TextEditingController();
   TextEditingController bioController = TextEditingController();
   String? selectedRole; // New field for Worker/Employer
+  String? selectedGender = 'Male';
 
   @override
   void initState() {
@@ -167,7 +168,7 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
                 decoration: AppStyles.textFieldDecoration.copyWith(
                   hintText: 'Select gender',
                 ),
-                items: [
+                items: const [
                   DropdownMenuItem(
                     value: 'Male', // Ensure this value is unique
                     child: Text('Male'),
@@ -193,7 +194,7 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
                 decoration: AppStyles.textFieldDecoration.copyWith(
                   hintText: 'Select role',
                 ),
-                items: [
+                items: const [
                   DropdownMenuItem(
                     value: 'worker', // Ensure this value is unique
                     child: Text('Worker'),

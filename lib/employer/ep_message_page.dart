@@ -120,6 +120,25 @@ class _EmployerMessagePageState extends State<EmployerMessagePage> {
     }
   }
 
+  void deleteRequest(String requestId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('requests')
+          .doc(requestId)
+          .delete();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Request deleted')),
+      );
+      // Fetch updated requests
+      fetchRequests();
+    } catch (e) {
+      print('Error deleting request: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to delete request')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -137,81 +156,98 @@ class _EmployerMessagePageState extends State<EmployerMessagePage> {
               itemBuilder: (context, index) {
                 DocumentSnapshot request = requests[index];
                 String requestId = request.id;
-                return FutureBuilder(
-                  future: fetchSenderName(requests[index]['senderId']),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator();
-                    } else if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
-                    } else {
-                      String senderName = snapshot.data.toString();
-                      return Container(
-                        margin: const EdgeInsets.symmetric(
-                            vertical: 8, horizontal: 16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.5),
-                              spreadRadius: 1,
-                              blurRadius: 2,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: ListTile(
-                          title: Text(
-                            'Request from: $senderName',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                            ),
-                          ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              ElevatedButton(
-                                onPressed: () => acceptRequest(requestId),
-                                style: ElevatedButton.styleFrom(
-                                  primary: Colors.green,
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 16),
-                                ),
-                                child: const Text(
-                                  'Accept',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              ElevatedButton(
-                                onPressed: () => rejectRequest(requestId),
-                                style: ElevatedButton.styleFrom(
-                                  primary: Colors.red,
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 16),
-                                ),
-                                child: const Text(
-                                  'Reject',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
+                return Dismissible(
+                  key: ValueKey(requestId),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    color: Colors.red,
+                    child: const Icon(
+                      Icons.delete,
+                      color: Colors.white,
+                      size: 30,
+                    ),
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.only(right: 20.0),
+                  ),
+                  onDismissed: (direction) {
+                    deleteRequest(requestId);
+                  },
+                  child: FutureBuilder(
+                    future: fetchSenderName(requests[index]['senderId']),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const CircularProgressIndicator();
+                      } else if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      } else {
+                        String senderName = snapshot.data.toString();
+                        return Container(
+                          margin: const EdgeInsets.symmetric(
+                              vertical: 8, horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 1,
+                                blurRadius: 2,
+                                offset: const Offset(0, 2),
                               ),
                             ],
                           ),
-                        ),
-                      );
-                    }
-                  },
+                          child: ListTile(
+                            title: Text(
+                              'Request from: $senderName',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                ElevatedButton(
+                                  onPressed: () => acceptRequest(requestId),
+                                  style: ElevatedButton.styleFrom(
+                                    primary: Colors.green,
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16),
+                                  ),
+                                  child: const Text(
+                                    'Accept',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                ElevatedButton(
+                                  onPressed: () => rejectRequest(requestId),
+                                  style: ElevatedButton.styleFrom(
+                                    primary: Colors.red,
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16),
+                                  ),
+                                  child: const Text(
+                                    'Reject',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                  ),
                 );
               },
             )
@@ -229,7 +265,7 @@ class _EmployerMessagePageState extends State<EmployerMessagePage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.message),
-            label: 'Messages',
+            label: 'Requests',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.post_add),

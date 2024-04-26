@@ -1,9 +1,9 @@
-// ignore_for_file: unused_local_variable
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'email_verification_page.dart';
+// ignore: unused_import
+import 'otp_verification_page.dart';
 import 'style.dart'; // Import the style.dart file
 
 class SignupForm extends StatefulWidget {
@@ -15,7 +15,6 @@ class _SignupFormState extends State<SignupForm> {
   // ignore: unused_field
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _phoneNumberController = TextEditingController();
@@ -23,18 +22,19 @@ class _SignupFormState extends State<SignupForm> {
 
   Future<void> _signup() async {
     try {
+      print("Starting signup process...");
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
       );
-
+      print("Email verification started...");
       // Send email verification
       User? user = FirebaseAuth.instance.currentUser;
       if (user != null && !user.emailVerified) {
         await user.sendEmailVerification();
       }
       // Save user details to Firestore
-
+      print("Saving user details to Firestore...");
       await FirebaseFirestore.instance
           .collection('users')
           .doc(_auth.currentUser!.uid)
@@ -44,7 +44,33 @@ class _SignupFormState extends State<SignupForm> {
         'role': _selectedRole,
       });
 
-      // Navigate to the email verification page
+      // await _auth.verifyPhoneNumber(
+      //   phoneNumber: '+91${_phoneNumberController.text}',
+      //   verificationCompleted: (PhoneAuthCredential credential) {},
+      //   verificationFailed: (FirebaseAuthException e) {
+      //     print('Phone number verification failed: $e');
+      //     ScaffoldMessenger.of(context).showSnackBar(
+      //       SnackBar(
+      //         content: Text('Phone number verification failed: $e'),
+      //       ),
+      //     );
+      //   },
+      //   codeSent: (String verificationId, int? resendToken) {
+      //     // Navigate to OTP verification page
+      //     ScaffoldMessenger.of(context).showSnackBar(
+      //       const SnackBar(
+      //         content: Text('OTP is Sent!!'),
+      //       ),
+      //     );
+      //     Navigator.of(context).pushReplacement(
+      //       MaterialPageRoute(
+      //         builder: (context) => OtpVerificationPage(verificationId),
+      //       ),
+      //     );
+      //   },
+      //   codeAutoRetrievalTimeout: (String verificationId) {},
+      // );
+
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => EmailVerificationPage(),
@@ -52,7 +78,7 @@ class _SignupFormState extends State<SignupForm> {
       );
     } catch (e) {
       // Handle signup errors here.
-      print(e.toString());
+      print("Error during signup: $e");
     }
   }
 
@@ -108,7 +134,7 @@ class _SignupFormState extends State<SignupForm> {
                     _selectedRole = value;
                   });
                 },
-                items: [
+                items: const [
                   DropdownMenuItem(
                     value: 'worker',
                     child: Text('Worker'),

@@ -233,7 +233,7 @@ class _WorkerAccountPageState extends State<WorkerAccountPage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.message),
-            label: 'WMessages',
+            label: 'WRequests',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.post_add),

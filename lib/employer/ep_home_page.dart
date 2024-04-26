@@ -77,7 +77,7 @@ class EmployerHomePage extends StatelessWidget {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.message),
-            label: 'Messages',
+            label: 'Requests',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.post_add),

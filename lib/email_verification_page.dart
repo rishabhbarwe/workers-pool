@@ -17,7 +17,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'mark-5',
+          'Phone / Email Verification',
           style: AppStyles.appBarTitle, // Apply app bar title style
         ),
         backgroundColor: AppStyles.appBarColor,
@@ -28,14 +28,14 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
+              const Text(
                 'Select your user type:',
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.black, // Apply specific styles here if needed
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               DropdownButton<String>(
                 value: userType,
                 onChanged: (value) {
@@ -44,17 +44,17 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                   });
                 },
                 items: [
-                  DropdownMenuItem(
+                  const DropdownMenuItem(
                     value: 'worker',
                     child: Text('Worker'),
                   ),
-                  DropdownMenuItem(
+                  const DropdownMenuItem(
                     value: 'employer',
                     child: Text('Employer'),
                   ),
                 ],
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () async {
                   // Check if the user has verified their email
@@ -79,7 +79,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                       );
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
+                        const SnackBar(
                           content: Text('Please select a user type.'),
                         ),
                       );
@@ -87,14 +87,14 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                   } else {
                     // Email is not verified, show a message
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
+                      const SnackBar(
                         content: Text('Email not yet verified.'),
                       ),
                     );
                   }
                 },
                 style: AppStyles.primaryButtonStyle, // Apply button style
-                child: Text('Check Verification'),
+                child: const Text('Check Verification'),
               ),
             ],
           ),

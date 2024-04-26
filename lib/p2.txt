@@ -1,128 +1,145 @@
-class FilterTag extends StatelessWidget {
-  final String tag;
-  final bool isSelected;
-  final VoidCallback? onTap;
+import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../style.dart';
+import 'wk_account_page.dart';
+import 'wk_home_page.dart';
+import 'wk_job_history.dart';
 
-  FilterTag({
-    required this.tag,
-    required this.isSelected,
-    this.onTap,
-  });
-
+class WorkerMessagePage extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.deepPurple : Colors.white30,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? Colors.deepPurple : Colors.deepPurple.withOpacity(0.5),
-            width: isSelected ? 2 : 1,
-          ),
-        ),
-        child: Text(
-          tag,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Colors.black,
-          ),
-        ),
-      ),
-    );
-  }
+  _WorkerMessagePageState createState() => _WorkerMessagePageState();
 }
 
-class _WorkerHomePageState extends State<WorkerHomePage> {
-  int _selectedIndex = 0;
-  late TextEditingController _searchController = TextEditingController();
-  String? _selectedJobType;
+class _WorkerMessagePageState extends State<WorkerMessagePage> {
+  late List<DocumentSnapshot> requests = [];
 
   @override
   void initState() {
     super.initState();
-    _searchController = TextEditingController();
-    _selectedJobType = null;
+    // Fetch requests sent to the current user
+    fetchRequests();
   }
 
-  // Other methods remain the same
-
-  void _filterJobsByType(String jobType) {
-    setState(() {
-      _selectedJobType = jobType; // Update selected job type
-    });
-  }
-
-  void _clearFilters() {
-    setState(() {
-      _selectedJobType = null; // Clear selected job type
-    });
+  Future<void> fetchRequests() async {
+    try {
+      User? currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser != null) {
+        QuerySnapshot snapshot = await FirebaseFirestore.instance
+            .collection('requests')
+            .where('senderId', isEqualTo: currentUser.uid)
+            .get();
+        setState(() {
+          requests = snapshot.docs;
+        });
+      }
+    } catch (e) {
+      print('Error fetching requests: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
         title: Text(
-          'Work1 Daily',
+          'Worker Messages',
           style: AppStyles.appBarTitle,
         ),
         backgroundColor: AppStyles.appBarColor,
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Other widgets remain the same
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  FilterTag(
-                    tag: 'Home',
-                    isSelected: _selectedJobType == null,
-                    onTap: _clearFilters,
-                  ),
-                  FilterTag(
-                    tag: 'Construction',
-                    isSelected: _selectedJobType == 'Construction',
-                    onTap: () => _filterJobsByType('Construction'),
-                  ),
-                  // Add other FilterTag widgets for each job type
-                  // Example:
-                  // FilterTag(
-                  //   tag: 'Outdoor',
-                  //   isSelected: _selectedJobType == 'Outdoor',
-                  //   onTap: () => _filterJobsByType('Outdoor'),
-                  // ),
-                ],
-              ),
-            ),
+      // ignore: unnecessary_null_comparison
+      body: requests == null
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : requests.isEmpty
+              ? Center(
+                  child: Text('No requests found'),
+                )
+              : ListView.builder(
+                  itemCount: requests.length,
+                  itemBuilder: (context, index) {
+                    DocumentSnapshot request = requests[index];
+                    String status = request['status'] ?? 'PENDING';
+                    return Padding(
+                      padding: EdgeInsets.all(1.0),
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          side: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        child: ListTile(
+                          title: status == 'PENDING'
+                              ? Text(
+                                  'The other user has not responded to this request.',
+                                  style: TextStyle(
+                                    fontStyle: FontStyle.italic,
+                                    color: Colors.grey,
+                                  ),
+                                )
+                              : Text(
+                                  'Request status: $status',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: status == 'ACCEPTED'
+                                        ? Colors.green
+                                        : Colors.red,
+                                  ),
+                                ),
+                          tileColor:
+                              status == 'PENDING' ? Colors.yellow[100] : null,
+                          contentPadding: EdgeInsets.all(12),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.work),
+            label: 'WJobs',
           ),
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: _selectedJobType != null
-                  ? FirebaseFirestore.instance
-                      .collection('jobPostings')
-                      .where('jobType', isEqualTo: _selectedJobType)
-                      .snapshots()
-                  : FirebaseFirestore.instance
-                      .collection('jobPostings')
-                      .snapshots(),
-              builder: (context, snapshot) {
-                // Builder logic remains the same
-              },
-            ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.message),
+            label: 'WRequests',
+            //  backgroundColor: Colors.red,
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.post_add),
+            label: 'WJob History',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'WProfile',
           ),
         ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        // Bottom navigation bar logic remains the same
+        selectedItemColor: AppStyles.appBarColor,
+        unselectedItemColor: Colors.grey,
+        backgroundColor: Colors.white,
+        currentIndex: 1,
+        onTap: (index) {
+          if (index == 0) {
+            // Navigate to the WorkerHomePage when the job icon is tapped
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => WorkerHomePage()),
+            );
+          }
+          if (index == 2) {
+            // Navigate to the WorkerJobHistoryPage when the job history icon is tapped
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => WorkerJobHistoryPage()),
+            );
+          }
+          if (index == 3) {
+            // Navigate to the WorkerAccountPage when the profile icon is tapped
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => WorkerAccountPage()),
+            );
+          }
+        },
       ),
     );
   }

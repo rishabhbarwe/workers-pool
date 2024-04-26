@@ -204,7 +204,7 @@ class _EmployerAccountPageState extends State<EmployerAccountPage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.message),
-            label: 'Messages',
+            label: 'Requests',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.post_add),
@@ -212,7 +212,7 @@ class _EmployerAccountPageState extends State<EmployerAccountPage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
-            label: 'EProfile',
+            label: 'Profile',
           ),
         ],
         selectedItemColor: AppStyles.appBarColor,

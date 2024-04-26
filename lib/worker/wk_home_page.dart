@@ -16,6 +16,8 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
   int _selectedIndex = 0;
   late TextEditingController _searchController = TextEditingController();
   String? _selectedJobType;
+  List<JobPosting> _filteredJobs = [];
+  TextEditingController _pincodeController = TextEditingController();
 
   void _onItemTapped(int index) {
     if (_selectedIndex != index) {
@@ -57,6 +59,7 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
   @override
   void dispose() {
     _searchController.dispose();
+    _pincodeController.dispose();
     super.dispose();
   }
 
@@ -78,6 +81,63 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
   void _clearFilters() {
     setState(() {
       _selectedJobType = null; // Clear selected job type
+    });
+  }
+
+  void _filterJobsByLocation() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Enter Pincode'),
+          content: TextField(
+            controller: _pincodeController,
+            keyboardType: TextInputType.number,
+            maxLength: 6,
+            decoration: InputDecoration(
+              hintText: 'Enter 6-digit Pincode',
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Filter'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _fetchAndFilterJobs(
+                    _pincodeController.text); // Pass pincode to the method
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _fetchAndFilterJobs(String pincode) {
+    setState(() {
+      _selectedJobType = null;
+    });
+
+    FirebaseFirestore.instance
+        .collection('jobPostings')
+        .where('location', isEqualTo: pincode)
+        .get()
+        .then((QuerySnapshot querySnapshot) {
+      setState(() {
+        _filteredJobs = querySnapshot.docs
+            .map((DocumentSnapshot document) =>
+                JobPosting.fromJson(document.data() as Map<String, dynamic>))
+            .toList();
+      });
+    }).catchError((error) {
+      print('Error fetching job postings: $error');
+      // Handle error
     });
   }
 
@@ -112,25 +172,36 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
                     ],
                   ),
                   margin: EdgeInsets.all(16),
-                  child: TextField(
-                    cursorColor: Colors.deepPurple,
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Search Jobs',
-                      border: InputBorder.none,
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                      suffixIcon: IconButton(
-                        icon: Icon(Icons.search),
-                        color: Colors.deepPurple,
-                        onPressed: () {
-                          _searchJobs(_searchController.text);
-                        },
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          cursorColor: Colors.deepPurple,
+                          controller: _searchController,
+                          decoration: InputDecoration(
+                            hintText: 'Search Jobs',
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 16),
+                            suffixIcon: IconButton(
+                              icon: Icon(Icons.search),
+                              color: Colors.deepPurple,
+                              onPressed: () {
+                                _searchJobs(_searchController.text);
+                              },
+                            ),
+                          ),
+                          onSubmitted: (value) {
+                            _searchJobs(value);
+                          },
+                        ),
                       ),
-                    ),
-                    onSubmitted: (value) {
-                      _searchJobs(value); // Trigger search on Enter
-                    },
+                      IconButton(
+                        icon: Icon(Icons.location_on),
+                        color: Colors.deepPurple,
+                        onPressed: _filterJobsByLocation,
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -208,6 +279,51 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                   return Center(child: Text('No job postings available.'));
                 }
+
+                if (_filteredJobs.isNotEmpty) {
+                  return ListView.builder(
+                    itemCount: _filteredJobs.length,
+                    itemBuilder: (context, index) {
+                      final job = _filteredJobs[index];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 8.0, horizontal: 16.0),
+                        child: Card(
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          color: Colors.deepPurple[100],
+                          child: ListTile(
+                            title: Text(job.jobTitle),
+                            subtitle: Text(job.companyName),
+                            trailing: Icon(Icons.arrow_forward),
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => WorkerJobDetailsPage(
+                                    createrId: job.createrId,
+                                    jobId: job.jobId,
+                                    jobTitle: job.jobTitle,
+                                    companyName: job.companyName,
+                                    jobType: job.jobType,
+                                    location: job.location,
+                                    jobDescription: job.jobDescription,
+                                    experience: job.experience,
+                                    qualification: job.qualification,
+                                    language: job.language,
+                                    jobTiming: job.jobTiming,
+                                    jobAddress: job.jobAddress,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                }
                 return ListView.builder(
                   itemCount: snapshot.data!.docs.length,
                   itemBuilder: (context, index) {
@@ -267,7 +383,7 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.message),
-            label: 'WMessages',
+            label: 'WRequests',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.post_add),

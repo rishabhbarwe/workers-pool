@@ -34,7 +34,7 @@ class WorkerJobHistoryPage extends StatelessWidget {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.message),
-            label: 'WMessages',
+            label: 'WRequests',
             //  backgroundColor: Colors.red,
           ),
           BottomNavigationBarItem(
