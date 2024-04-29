@@ -45,6 +45,8 @@ class WorkerJobDetailsPage extends StatelessWidget {
           'receiverId': createrId, // ID of the employer
           'jobId': jobId,
           'status': 'PENDING',
+          'companyName': companyName, // Add companyName field
+          'jobTitle': jobTitle, // Add jobTitle field
           // Add other details as needed
         });
 
@@ -114,7 +116,7 @@ class WorkerJobDetailsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Job Details..',
+          'Job Details',
           style: AppStyles.appBarTitle,
         ),
         backgroundColor: AppStyles.appBarColor,

@@ -248,7 +248,6 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
               SizedBox(height: 16.0),
               ElevatedButton(
                 onPressed: () {
-                  // Call the function to save changes when the button is pressed
                   saveChanges();
                 },
                 style: AppStyles.primaryButtonStyle,

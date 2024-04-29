@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 import 'style.dart';
 
 class PostJobPage extends StatelessWidget {
@@ -59,9 +60,14 @@ class PostJobPage extends StatelessWidget {
               TextField(
                 controller: locationController,
                 decoration: AppStyles.textFieldDecoration.copyWith(
-                  labelText: 'Location',
+                  labelText: 'Location pincode only',
                 ),
                 cursorColor: Colors.deepPurple,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly, // Accepts only digits
+                  LengthLimitingTextInputFormatter(
+                      6), // Limits input to 6 characters
+                ],
               ),
               SizedBox(height: 8),
               TextField(

@@ -17,7 +17,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Phone / Email Verification',
+          'Email Verification',
           style: AppStyles.appBarTitle, // Apply app bar title style
         ),
         backgroundColor: AppStyles.appBarColor,
@@ -55,6 +55,14 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                 ],
               ),
               const SizedBox(height: 20),
+              Text(
+                'Please Check your Registered Email Inbox for Verification ',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black, // Apply specific styles here if needed
+                ),
+              ),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () async {
                   // Check if the user has verified their email
@@ -88,13 +96,14 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                     // Email is not verified, show a message
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Email not yet verified.'),
+                        content: Text(
+                            'Please Check your Registered Email Inbox ;\nEmail not yet verified.'),
                       ),
                     );
                   }
                 },
                 style: AppStyles.primaryButtonStyle, // Apply button style
-                child: const Text('Check Verification'),
+                child: const Text('Go to Homepage '),
               ),
             ],
           ),

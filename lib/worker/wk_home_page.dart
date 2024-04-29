@@ -74,13 +74,13 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
 
   void _filterJobsByType(String jobType) {
     setState(() {
-      _selectedJobType = jobType; // Update selected job type
+      _selectedJobType = jobType;
     });
   }
 
   void _clearFilters() {
     setState(() {
-      _selectedJobType = null; // Clear selected job type
+      _selectedJobType = null;
     });
   }
 
@@ -147,7 +147,7 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text(
-          'Work1 Daily',
+          'Work Daily',
           style: AppStyles.appBarTitle,
         ),
         backgroundColor: AppStyles.appBarColor,
@@ -379,19 +379,19 @@ class _WorkerHomePageState extends State<WorkerHomePage> {
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.work),
-            label: 'WJobs',
+            label: 'Jobs',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.message),
-            label: 'WRequests',
+            label: 'Requests',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.post_add),
-            label: 'WJob History',
+            label: 'Job History',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
-            label: 'WProfile',
+            label: 'Profile',
           ),
         ],
         selectedItemColor: _getSelectedColor(_selectedIndex),

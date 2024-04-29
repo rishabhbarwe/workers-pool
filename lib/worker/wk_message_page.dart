@@ -81,6 +81,10 @@ class _WorkerMessagePageState extends State<WorkerMessagePage> {
                   itemBuilder: (context, index) {
                     DocumentSnapshot request = requests[index];
                     String status = request['status'] ?? 'PENDING';
+                    String companyName =
+                        request['companyName'] ?? 'Company Name';
+                    String jobTitle = request['jobTitle'] ?? 'Job Title';
+
                     return Dismissible(
                       key: Key(request.id),
                       direction: DismissDirection.endToStart,
@@ -97,7 +101,7 @@ class _WorkerMessagePageState extends State<WorkerMessagePage> {
                         deleteRequest(request.id);
                       },
                       child: Padding(
-                        padding: EdgeInsets.all(1.0),
+                        padding: EdgeInsets.all(4.0),
                         child: Card(
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -105,20 +109,66 @@ class _WorkerMessagePageState extends State<WorkerMessagePage> {
                           ),
                           child: ListTile(
                             title: status == 'PENDING'
-                                ? Text(
-                                    'The other user has not responded to this request.',
-                                    style: TextStyle(
-                                      color: Colors.grey,
-                                    ),
+                                ? Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      SizedBox(height: 8),
+                                      Text(
+                                        'Company Name: $companyName',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                      SizedBox(height: 8),
+                                      Text(
+                                        'Job Title: $jobTitle',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                      SizedBox(height: 8),
+                                      Text(
+                                        'Request status: $status',
+                                        style: TextStyle(
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ],
                                   )
-                                : Text(
-                                    'Request status: $status',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: status == 'ACCEPTED'
-                                          ? Colors.green
-                                          : Colors.red,
-                                    ),
+                                : Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      SizedBox(height: 8),
+                                      Text(
+                                        'Company Name: $companyName',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                      SizedBox(height: 8),
+                                      Text(
+                                        'Job Title: $jobTitle',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                      SizedBox(height: 8),
+                                      Text(
+                                        'Request status: $status',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: status == 'ACCEPTED'
+                                              ? Colors.green
+                                              : Colors.red,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                             tileColor:
                                 status == 'PENDING' ? Colors.yellow[100] : null,
@@ -134,19 +184,19 @@ class _WorkerMessagePageState extends State<WorkerMessagePage> {
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.work),
-            label: 'WJobs',
+            label: 'Jobs',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.message),
-            label: 'WRequests',
+            label: 'Requests',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.post_add),
-            label: 'WJob History',
+            label: 'Job History',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
-            label: 'WProfile',
+            label: 'Profile',
           ),
         ],
         selectedItemColor: AppStyles.appBarColor,

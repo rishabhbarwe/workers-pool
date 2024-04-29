@@ -156,6 +156,12 @@ class _EmployerMessagePageState extends State<EmployerMessagePage> {
               itemBuilder: (context, index) {
                 DocumentSnapshot request = requests[index];
                 String requestId = request.id;
+                // String status = request['status'] ?? 'PENDING';
+                String jobTitle = request['jobTitle'] ?? 'Job Title';
+                String companyName = request['companyName'] ?? 'Company Name';
+                // Color? tileColor = status == 'ACCEPTED' || status == 'REJECTED'
+                //     ? Colors.grey
+                //     : Colors.blueGrey[100];
                 return Dismissible(
                   key: ValueKey(requestId),
                   direction: DismissDirection.endToStart,
@@ -198,9 +204,9 @@ class _EmployerMessagePageState extends State<EmployerMessagePage> {
                           ),
                           child: ListTile(
                             title: Text(
-                              'Request from: $senderName',
+                              'Request from: $senderName \nCompany : $companyName\nJob: $jobTitle',
                               style: const TextStyle(
-                                fontSize: 16,
+                                fontSize: 15,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black,
                               ),
@@ -243,6 +249,8 @@ class _EmployerMessagePageState extends State<EmployerMessagePage> {
                                 ),
                               ],
                             ),
+                            // tileColor: tileColor,
+                            // contentPadding: EdgeInsets.all(12),
                           ),
                         );
                       }

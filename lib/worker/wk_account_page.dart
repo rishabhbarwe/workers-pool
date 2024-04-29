@@ -2,18 +2,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../main.dart';
-import '../style.dart'; // Import your style.dart file
+import '../style.dart';
 import '../user_details_page.dart';
 import 'wk_home_page.dart';
 import 'wk_job_history.dart';
-import 'wk_message_page.dart'; // Import your UserDetailsPage
+import 'wk_message_page.dart';
 
 int _acurrentIndex = 0;
 
 class WorkerAccountPage extends StatefulWidget {
   WorkerAccountPage({Key? key}) : super(key: key);
-  // Declare _currentIndex variable to keep track of the selected tab
-  // int _currentIndex = 0;
 
   @override
   _WorkerAccountPageState createState() => _WorkerAccountPageState();
@@ -27,7 +25,6 @@ class _WorkerAccountPageState extends State<WorkerAccountPage> {
   @override
   void initState() {
     super.initState();
-    // Fetch the user's name and email from Firebase when the page loads
     fetchUserData();
   }
 
@@ -229,19 +226,19 @@ class _WorkerAccountPageState extends State<WorkerAccountPage> {
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.work),
-            label: 'WJobs',
+            label: 'Jobs',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.message),
-            label: 'WRequests',
+            label: 'Requests',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.post_add),
-            label: 'WJob History',
+            label: 'Job History',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
-            label: 'WProfile',
+            label: 'Profile',
           ),
         ],
         selectedItemColor: AppStyles.appBarColor,
